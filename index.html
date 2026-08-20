@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tarik Tambang Arena HD + Reset Soal</title>
+  <title>Tarik Tambang Arena HD + Exit Room Timer Stabil</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -52,9 +52,13 @@
     #game-container { display: none; flex-direction: column; width: 100vw; height: 100dvh; background: linear-gradient(180deg, #0284c7 0%, #0f172a 100%); justify-content: space-between; padding: max(10px, env(safe-area-inset-top)) 12px max(15px, env(safe-area-inset-bottom)) 12px; }
 
     /* TOP BAR STATS */
-    .top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); padding: 8px 15px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); gap: 6px; }
     .room-badge { font-weight: 700; color: #93c5fd; font-size: 12px; }
-    .timer-badge { font-family: 'Titan One', cursive; color: #f87171; background: #450a0a; padding: 4px 12px; border-radius: 12px; border: 2px solid #ef4444; font-size: 14px; }
+    .timer-badge { font-family: 'Titan One', cursive; color: #f87171; background: #450a0a; padding: 4px 10px; border-radius: 12px; border: 2px solid #ef4444; font-size: 13px; }
+    
+    /* TOMBOL KELUAR GAME */
+    .btn-exit-game { background: #dc2626; border: 1px solid #f87171; color: white; border-radius: 10px; padding: 5px 10px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .btn-exit-game:active { transform: scale(0.95); }
 
     /* STADIUM ARENA */
     .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 100px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3); margin: 8px 0; }
@@ -101,7 +105,6 @@
       </div>
 
       <button class="btn-play" onclick="gabungRoom()">MAIN SEKARANG 🚀</button>
-      
       <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Bank Soal</button>
     </div>
   </div>
@@ -121,13 +124,10 @@
           <input type="file" id="input-csv" accept=".csv" style="display:none;" onchange="bacaFileCSV(event)">
         </label>
 
-        <!-- TOMBOL RESET SEMUA SOAL -->
         <button class="btn-tool btn-red" onclick="resetSemuaSoal()">🗑 Reset Semua Soal</button>
-
         <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan ke Database</button>
       </div>
 
-      <!-- LIST CONTAINER TEMPAT SOAL DIEDIT -->
       <div id="list-soal-container"></div>
     </div>
   </div>
@@ -135,8 +135,11 @@
   <!-- GAME ARENA MAIN -->
   <div id="game-container">
     <div class="top-bar">
-      <div class="room-badge">ROOM: <span id="lbl-room" style="color:#fff;">-</span> | TIM: <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span></div>
+      <div class="room-badge">R: <span id="lbl-room" style="color:#fff;">-</span> | <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span></div>
       <div id="waktu" class="timer-badge">10:00</div>
+      
+      <!-- TOMBOL KELUAR GAME UNTUK STABILKAN TIMER -->
+      <button class="btn-exit-game" onclick="keluarGame()">🚪 Keluar</button>
     </div>
 
     <!-- STADIUM ARENA -->
@@ -168,7 +171,7 @@
   <div id="overlay-menang" class="overlay">
     <div class="win-card">
       <div id="teks-menang" class="win-title">TIM NARUTO MENANG!</div>
-      <button class="btn-play" onclick="window.location.reload()">MAIN LAGI 🏠</button>
+      <button class="btn-play" onclick="keluarGame()">KEMBALI KE LOBBY 🏠</button>
     </div>
   </div>
 
@@ -190,8 +193,9 @@
     let timSaya = 1;
     let roomRef = null;
     let idxSoal = 0;
+    let timerInterval = null;
 
-    // Sinkronkan Soal dengan Firebase
+    // Load Soal
     function muatSoalDariFirebase() {
       db.ref('bankSoal').on('value', (snapshot) => {
         const data = snapshot.val();
@@ -205,13 +209,9 @@
     }
     muatSoalDariFirebase();
 
-    /* FITUR EDITOR */
-    function bukaEditorSoal() {
-      document.getElementById('modal-editor').style.display = 'flex';
-    }
-    function tutupEditorSoal() {
-      document.getElementById('modal-editor').style.display = 'none';
-    }
+    /* EDITOR BANK SOAL */
+    function bukaEditorSoal() { document.getElementById('modal-editor').style.display = 'flex'; }
+    function tutupEditorSoal() { document.getElementById('modal-editor').style.display = 'none'; }
 
     function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
@@ -254,9 +254,8 @@
       renderFormEditor();
     }
 
-    // FITUR RESET SEMUA SOAL
     function resetSemuaSoal() {
-      if (confirm("Apakah bosq yakin ingin MENGHAPUS SEMUA SOAL? Data yang dihapus tidak bisa dikembalikan!")) {
+      if (confirm("Apakah bosq yakin ingin MENGHAPUS SEMUA SOAL?")) {
         bankSoal = [];
         db.ref('bankSoal').remove().then(() => {
           renderFormEditor();
@@ -265,10 +264,7 @@
       }
     }
 
-    function updateDataSoal(idx, key, val) {
-      bankSoal[idx][key] = val;
-    }
-
+    function updateDataSoal(idx, key, val) { bankSoal[idx][key] = val; }
     function updateDataOpsi(idx, opsiIdx, val) {
       if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["", "", "", ""];
       bankSoal[idx].opsi[opsiIdx] = val;
@@ -300,7 +296,7 @@
         if (hasilSoal.length > 0) {
           bankSoal = hasilSoal;
           renderFormEditor();
-          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari CSV! Klik "Simpan ke Database" untuk memperbarui.`);
+          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari CSV!`);
         } else {
           alert("Format CSV tidak valid!");
         }
@@ -310,12 +306,12 @@
 
     function simpanKeDatabase() {
       db.ref('bankSoal').set(bankSoal).then(() => {
-        alert("✅ Berhasil menyimpan seluruh Bank Soal ke Database Cloud!");
+        alert("✅ Berhasil menyimpan Bank Soal ke Cloud!");
         tutupEditorSoal();
       });
     }
 
-    /* GAMEPLAY ENGINE */
+    /* SISTEM GAMEPLAY STABIL */
     function pilihTim(t) {
       timSaya = t;
       document.getElementById('btn-t1').classList.toggle('active', t === 1);
@@ -330,6 +326,7 @@
       roomRef = db.ref('rooms/' + roomID);
 
       document.getElementById('main-menu').style.display = 'none';
+      document.getElementById('overlay-menang').style.display = 'none';
       document.getElementById('game-container').style.display = 'flex';
       document.getElementById('lbl-room').innerText = code;
       
@@ -340,8 +337,72 @@
       const btns = document.querySelectorAll('.btn-ans');
       btns.forEach(b => b.className = `btn-ans ${timSaya === 1 ? 'ans-naruto' : 'ans-sasuke'}`);
 
+      idxSoal = 0;
       tampilkanSoal();
       inisiatisasiRoom();
+    }
+
+    function inisiatisasiRoom() {
+      roomRef.get().then((snapshot) => {
+        if (!snapshot.exists()) {
+          roomRef.set({ posisi: 50, waktu: 600 });
+        }
+        dengarkanServer();
+        mulaiHitungMundurStabil();
+      });
+    }
+
+    function dengarkanServer() {
+      roomRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        document.getElementById('rope-group').style.left = data.posisi + "%";
+
+        if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
+        else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
+      });
+    }
+
+    // HITUNG MUNDUR TIMER SANGAT STABIL
+    function mulaiHitungMundurStabil() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        if (!roomRef) return;
+
+        roomRef.child('waktu').transaction((wkt) => {
+          if (wkt === null) return 600;
+          return wkt > 0 ? wkt - 1 : 0;
+        }, (error, committed, snapshot) => {
+          if (committed && snapshot.exists()) {
+            let totalSec = snapshot.val();
+            let m = Math.floor(totalSec / 60);
+            let s = totalSec % 60;
+            document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+
+            if (totalSec <= 0) {
+              akhiriGame("⏰ WAKTU HABIS!");
+            }
+          }
+        });
+      }, 1000);
+    }
+
+    // MEMUTUSKAN KONEKSI ROOM & BERSIHKAN TIMER saat keluar
+    function keluarGame() {
+      if (roomRef) {
+        roomRef.off();
+        roomRef = null;
+      }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      document.getElementById('game-container').style.display = 'none';
+      document.getElementById('overlay-menang').style.display = 'none';
+      document.getElementById('main-menu').style.display = 'flex';
     }
 
     function tampilkanSoal() {
@@ -355,30 +416,6 @@
       document.getElementById('opt1').innerText = s.opsi ? s.opsi[1] : "";
       document.getElementById('opt2').innerText = s.opsi ? s.opsi[2] : "";
       document.getElementById('opt3').innerText = s.opsi ? s.opsi[3] : "";
-    }
-
-    function inisiatisasiRoom() {
-      roomRef.get().then((snapshot) => {
-        if (!snapshot.exists()) {
-          roomRef.set({ posisi: 50, waktu: 600 });
-        }
-        dengarkanServer();
-      });
-    }
-
-    function dengarkanServer() {
-      roomRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        document.getElementById('rope-group').style.left = data.posisi + "%";
-
-        let m = Math.floor(data.waktu / 60); let s = data.waktu % 60;
-        document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-
-        if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
-        else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
-      });
     }
 
     function jawab(pilihan) {
@@ -401,6 +438,7 @@
     }
 
     function akhiriGame(pesan) {
+      if (timerInterval) clearInterval(timerInterval);
       document.getElementById('teks-menang').innerText = pesan;
       document.getElementById('overlay-menang').style.display = "flex";
     }
