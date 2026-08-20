@@ -2,73 +2,73 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tarik Tambang Mabar Online</title>
   
-  <!-- Firebase SDK Compat Version -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap');
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Poppins', sans-serif; background: #0f172a; height: 100vh; overflow: hidden; user-select: none; color: #1e293b; }
+    body { font-family: 'Poppins', sans-serif; background: #0f172a; height: 100vh; width: 100vw; overflow: hidden; user-select: none; color: #1e293b; }
     
-    /* MENU ROOM */
-    #main-menu { position: absolute; top:0; left:0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 50; background: rgba(15, 23, 42, 0.95); flex-direction: column;}
-    .menu-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); text-align: center; width: 85%; max-width: 400px; color: white;}
-    .menu-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
-    .input-room { width: 80%; padding: 12px; border-radius: 12px; border: 2px solid #3b82f6; font-size: 18px; text-align: center; font-weight: 800; margin: 15px 0; outline: none; }
+    /* MENU UTAMA */
+    #main-menu { position: absolute; top:0; left:0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 50; background: rgba(15, 23, 42, 0.95); flex-direction: column; }
+    .menu-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); padding: 25px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); text-align: center; width: 90%; max-width: 360px; color: white; }
+    .menu-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+    .input-room { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #3b82f6; font-size: 18px; text-align: center; font-weight: 800; margin: 12px 0; outline: none; background: #fff; }
     .team-select { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
-    .btn-team { flex: 1; padding: 10px; border: 2px solid transparent; border-radius: 10px; cursor: pointer; font-weight: 800; color: white; opacity: 0.5; }
-    .btn-team.active { opacity: 1; border-color: white; transform: scale(1.05); }
+    .btn-team { flex: 1; padding: 12px 8px; border: 2px solid transparent; border-radius: 10px; cursor: pointer; font-weight: 800; color: white; opacity: 0.5; font-size: 14px; }
+    .btn-team.active { opacity: 1; border-color: white; transform: scale(1.02); }
     .team-naruto { background: linear-gradient(135deg, #60a5fa, #2563eb); }
     .team-sasuke { background: linear-gradient(135deg, #f87171, #dc2626); }
-    .btn-main { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; color: white; cursor: pointer; background: #10b981; }
+    .btn-main { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; color: white; cursor: pointer; background: #10b981; }
     
-    /* GAME CONTAINER */
-    #game-container { display: none; flex-direction: column; height: 100vh; background: #f1f5f9; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .room-info { font-weight: 800; color: #475569; font-size: 14px; }
-    .timer { font-size: 18px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 5px 12px; border-radius: 10px; border: 1px solid #fca5a5; }
+    /* LAYOUT UTAMA HP */
+    #game-container { display: none; flex-direction: column; height: 100vh; height: -webkit-fill-available; background: #f1f5f9; justify-content: space-between; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .room-info { font-weight: 800; color: #475569; font-size: 13px; }
+    .timer { font-size: 16px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 4px 10px; border-radius: 8px; border: 1px solid #fca5a5; }
 
-    /* ARENA */
-    .arena-wrapper { padding: 30px 20px; position: relative; display: flex; justify-content: center; width: 100%; }
-    .arena { width: 100%; height: 50px; background: #cbd5e1; border-radius: 25px; position: relative; display: flex; align-items: center; border: 2px solid white; }
-    .garis-tengah { position: absolute; width: 6px; height: 100%; background: #10b981; left: 50%; transform: translateX(-50%); z-index: 1; }
+    /* ARENA TALI */
+    .arena-wrapper { padding: 15px; width: 100%; display: flex; justify-content: center; }
+    .arena { width: 100%; height: 46px; background: #cbd5e1; border-radius: 23px; position: relative; display: flex; align-items: center; border: 2px solid white; }
+    .garis-tengah { position: absolute; width: 5px; height: 100%; background: #10b981; left: 50%; transform: translateX(-50%); z-index: 1; }
     
-    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.2s ease-out; z-index: 2; width: 180px; justify-content: space-between; }
-    .tali { position: absolute; width: 100%; height: 8px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
-    .simpul { width: 16px; height: 22px; background: #f59e0b; border-radius: 4px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
-    .karakter-img { width: 45px; height: 45px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.2s ease-out; z-index: 2; width: 170px; justify-content: space-between; }
+    .tali { position: absolute; width: 100%; height: 6px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
+    .simpul { width: 14px; height: 20px; background: #f59e0b; border-radius: 3px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
+    .karakter-img { width: 42px; height: 42px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     .char-kanan { transform: scaleX(-1); }
 
-    /* SOAL & KONTROL */
-    .soal-container { padding: 10px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .soal-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; border-top: 5px solid #8b5cf6; }
-    .soal-teks { font-size: 16px; font-weight: 800; color: #1e293b; margin: 0; }
+    /* KOTAK SOAL */
+    .soal-container { padding: 0 15px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; }
+    .soal-box { background: white; padding: 18px 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; border-top: 4px solid #8b5cf6; min-height: 90px; display: flex; align-items: center; justify-content: center; }
+    .soal-teks { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; line-height: 1.4; }
 
-    .kontrol-pemain { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 500px; margin: 0 auto; width: 100%; }
-    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 14px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-    .btn-opsi:active { transform: scale(0.95); }
+    /* KONTROL JAWABAN (JEMPOL FRIENDLY) */
+    .kontrol-pemain { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 10px; }
+    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 16px 10px; color: white; font-family: 'Poppins'; font-weight: 700; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); line-height: 1.2; text-align: center; }
+    .btn-opsi:active { transform: scale(0.96); }
     .btn-naruto-theme { background: linear-gradient(135deg, #60a5fa, #2563eb); }
     .btn-sasuke-theme { background: linear-gradient(135deg, #f87171, #dc2626); }
 
     /* OVERLAY HASIL */
     .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; color: white; }
-    .win-box { background: white; color: #1e293b; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 350px; }
+    .win-box { background: white; color: #1e293b; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 320px; }
   </style>
 </head>
 <body>
 
-  <!-- MENU AWAL -->
+  <!-- MAIN MENU -->
   <div id="main-menu">
     <div class="menu-card">
       <h1 class="menu-title">🌐 Mabar Online<br>Tarik Tambang</h1>
-      <p style="color: #94a3b8; font-size: 12px;">Masukkan Kode Room Samamu:</p>
+      <p style="color: #94a3b8; font-size: 11px; margin-top: 4px;">Masukkan Kode Room Samamu:</p>
       
-      <input type="number" id="room-code" class="input-room" placeholder="Misal: 1234">
+      <input type="number" id="room-code" class="input-room" placeholder="Contoh: 1234">
       
       <div class="team-select">
         <button id="btn-team-1" class="btn-team team-naruto active" onclick="pilihTim(1)">🌀 Naruto</button>
@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <!-- ARENA GAME -->
+  <!-- GAME ARENA -->
   <div id="game-container">
     <div class="header">
       <div class="room-info">ROOM: <span id="label-room">1234</span> | TIM: <span id="label-tim">Naruto</span></div>
@@ -112,7 +112,7 @@
     </div>
   </div>
 
-  <!-- OVERLAY SELESAI -->
+  <!-- OVERLAY MENANG -->
   <div id="overlay-menang" class="overlay">
     <div class="win-box">
       <h2 id="teks-menang" style="font-size: 20px; margin-bottom: 15px;">Pemenang!</h2>
@@ -121,7 +121,7 @@
   </div>
 
   <script>
-    // 1. FIREBASE CONFIG
+    // FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
       authDomain: "tarik-tambang-all-in.firebaseapp.com",
@@ -134,7 +134,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. BANK SOAL
+    // BANK SOAL
     const bankSoal = [
       { soal: "Berapakah hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], jawaban: 2 },
       { soal: "Ibu kota negara Indonesia saat ini adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 },
@@ -169,6 +169,7 @@
       const btns = document.querySelectorAll('.btn-opsi');
       btns.forEach(b => b.className = `btn-opsi ${timSaya === 1 ? 'btn-naruto-theme' : 'btn-sasuke-theme'}`);
 
+      // Memuat soal pertama secara langsung
       tampilkanSoalLokal();
       inisiatisasiRoom();
     }
@@ -202,11 +203,11 @@
         // Gerakkan tali realtime
         document.getElementById('karakter-grup').style.left = data.posisi + "%";
 
-        // Tampilkan timer
+        // Timer
         let m = Math.floor(data.waktu / 60); let s = data.waktu % 60;
         document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
 
-        // Cek kondisi menang
+        // Penentuan Menang
         if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
         else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
       });
@@ -217,7 +218,7 @@
       let isBenar = (indexPilihan === sCur.jawaban);
       let power = 5;
 
-      // Update posisi tali ke server
+      // Update skor/posisi ke server Firebase
       roomRef.child('posisi').transaction((posSekarang) => {
         if (posSekarang === null) return 50;
         if (isBenar) {
@@ -227,7 +228,7 @@
         }
       });
 
-      // Lanjut ke soal berikutnya secara mandiri di HP ini
+      // Berpindah ke soal berikutnya
       indeksSoalSaya = (indeksSoalSaya + 1) % bankSoal.length;
       tampilkanSoalLokal();
     }
