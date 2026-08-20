@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tarik Tambang Arena HD + Editor Soal CSV</title>
+  <title>Tarik Tambang Arena HD + Reset Soal</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -30,7 +30,7 @@
     
     .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-    /* MODAL EDITOR BANK SOAL (SERUPA SCREENSHOT BOSQ) */
+    /* MODAL EDITOR BANK SOAL */
     .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
     .modal-header { background: #3b82f6; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
     .modal-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
@@ -40,6 +40,7 @@
     .btn-tool { padding: 10px 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
     .btn-blue { background: #3b82f6; }
     .btn-orange { background: #f59e0b; border: 2px solid #000; color: #000; }
+    .btn-red { background: #ef4444; color: white; }
     .btn-green { background: #10b981; margin-left: auto; }
 
     .soal-item-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; margin-bottom: 10px; color: white; }
@@ -101,12 +102,11 @@
 
       <button class="btn-play" onclick="gabungRoom()">MAIN SEKARANG 🚀</button>
       
-      <!-- TOMBOL BUKA EDITOR BANK SOAL -->
       <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Bank Soal</button>
     </div>
   </div>
 
-  <!-- MODAL EDITOR BANK SOAL (SESUAI GAMBAR BARU) -->
+  <!-- MODAL EDITOR BANK SOAL -->
   <div id="modal-editor" class="modal-editor">
     <div class="modal-header">
       <div>⚙️ Editor Bank Soal</div>
@@ -120,6 +120,9 @@
           📁 Upload File CSV
           <input type="file" id="input-csv" accept=".csv" style="display:none;" onchange="bacaFileCSV(event)">
         </label>
+
+        <!-- TOMBOL RESET SEMUA SOAL -->
+        <button class="btn-tool btn-red" onclick="resetSemuaSoal()">🗑 Reset Semua Soal</button>
 
         <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan ke Database</button>
       </div>
@@ -195,17 +198,14 @@
         if (data) {
           bankSoal = Array.isArray(data) ? data : Object.values(data);
         } else {
-          bankSoal = [
-            { soal: "Berapakah hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], jawaban: 2 },
-            { soal: "Ibu kota negara Indonesia saat ini adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 }
-          ];
+          bankSoal = [];
         }
         renderFormEditor();
       });
     }
     muatSoalDariFirebase();
 
-    /* FITUR EDITOR & UPLOAD CSV */
+    /* FITUR EDITOR */
     function bukaEditorSoal() {
       document.getElementById('modal-editor').style.display = 'flex';
     }
@@ -216,6 +216,11 @@
     function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
       container.innerHTML = '';
+
+      if (bankSoal.length === 0) {
+        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:30px; font-size:14px;">Belum ada soal. Klik "+ Tambah Soal" atau "Upload File CSV".</div>';
+        return;
+      }
 
       bankSoal.forEach((s, idx) => {
         const card = document.createElement('div');
@@ -249,6 +254,17 @@
       renderFormEditor();
     }
 
+    // FITUR RESET SEMUA SOAL
+    function resetSemuaSoal() {
+      if (confirm("Apakah bosq yakin ingin MENGHAPUS SEMUA SOAL? Data yang dihapus tidak bisa dikembalikan!")) {
+        bankSoal = [];
+        db.ref('bankSoal').remove().then(() => {
+          renderFormEditor();
+          alert("🗑 Seluruh soal berhasil dikosongkan!");
+        });
+      }
+    }
+
     function updateDataSoal(idx, key, val) {
       bankSoal[idx][key] = val;
     }
@@ -258,7 +274,6 @@
       bankSoal[idx].opsi[opsiIdx] = val;
     }
 
-    // UPLOAD FILE CSV AUTOMATIS
     function bacaFileCSV(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -271,7 +286,6 @@
 
         baris.forEach(row => {
           if (row.trim() !== '') {
-            // Kolom CSV: Pertanyaan, OpsiA, OpsiB, OpsiC, OpsiD, Kunci(0-3)
             const col = row.split(',');
             if (col.length >= 6) {
               hasilSoal.push({
@@ -286,9 +300,9 @@
         if (hasilSoal.length > 0) {
           bankSoal = hasilSoal;
           renderFormEditor();
-          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari file CSV! Klik "Simpan ke Database" untuk memperbarui.`);
+          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari CSV! Klik "Simpan ke Database" untuk memperbarui.`);
         } else {
-          alert(" Format CSV tidak valid! Pastikan format per baris: Soal, OpsiA, OpsiB, OpsiC, OpsiD, KunciJawaban(0-3)");
+          alert("Format CSV tidak valid!");
         }
       };
       reader.readAsText(file);
@@ -301,7 +315,7 @@
       });
     }
 
-    /* SISTEM GAMEPLAY */
+    /* GAMEPLAY ENGINE */
     function pilihTim(t) {
       timSaya = t;
       document.getElementById('btn-t1').classList.toggle('active', t === 1);
@@ -331,7 +345,10 @@
     }
 
     function tampilkanSoal() {
-      if (bankSoal.length === 0) return;
+      if (bankSoal.length === 0) {
+        document.getElementById('teks-soal').innerText = "Belum ada soal di database! Silakan upload dulu.";
+        return;
+      }
       let s = bankSoal[idxSoal % bankSoal.length];
       document.getElementById('teks-soal').innerText = s.soal;
       document.getElementById('opt0').innerText = s.opsi ? s.opsi[0] : "";
