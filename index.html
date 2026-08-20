@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tarik Tambang Arena HD + Exit Room Timer Stabil</title>
+  <title>Tarik Tambang Arena HD + Mode Juri</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -16,9 +16,15 @@
     
     /* MENU LOBBY PRO */
     #main-menu { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); padding: 20px; }
-    .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 25px 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-    .game-logo { font-family: 'Titan One', cursive; font-size: 24px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 15px; }
-    .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 15px; }
+    .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 25px 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+    .game-logo { font-family: 'Titan One', cursive; font-size: 24px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 12px; }
+    .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 12px; }
+    
+    /* SELEKSI ROLE (PEMAIN / JURI) */
+    .role-select { display: flex; gap: 8px; margin-bottom: 12px; background: #0f172a; padding: 4px; border-radius: 12px; }
+    .btn-role { flex: 1; padding: 8px; border-radius: 10px; border: none; font-weight: 700; font-size: 12px; color: #94a3b8; background: transparent; cursor: pointer; }
+    .btn-role.active { background: #6366f1; color: white; }
+
     .team-select { display: flex; gap: 10px; margin-bottom: 15px; }
     .btn-team { flex: 1; padding: 12px; border-radius: 14px; border: 3px solid transparent; font-family: 'Titan One', cursive; font-size: 14px; color: #fff; cursor: pointer; opacity: 0.5; transition: 0.2s; }
     .btn-team.active { opacity: 1; border-color: #fff; transform: scale(1.05); }
@@ -28,7 +34,8 @@
     .btn-play { width: 100%; padding: 14px; border: none; border-radius: 16px; background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; font-family: 'Titan One', cursive; font-size: 16px; text-shadow: 1px 2px 0 #000; box-shadow: 0 5px 0 #166534; cursor: pointer; margin-bottom: 10px; }
     .btn-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #166534; }
     
-    .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .lobby-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
     /* MODAL EDITOR BANK SOAL */
     .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
@@ -56,12 +63,11 @@
     .room-badge { font-weight: 700; color: #93c5fd; font-size: 12px; }
     .timer-badge { font-family: 'Titan One', cursive; color: #f87171; background: #450a0a; padding: 4px 10px; border-radius: 12px; border: 2px solid #ef4444; font-size: 13px; }
     
-    /* TOMBOL KELUAR GAME */
     .btn-exit-game { background: #dc2626; border: 1px solid #f87171; color: white; border-radius: 10px; padding: 5px 10px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
     .btn-exit-game:active { transform: scale(0.95); }
 
     /* STADIUM ARENA */
-    .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 100px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3); margin: 8px 0; }
+    .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 110px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3); margin: 8px 0; }
     .center-line { position: absolute; left: 50%; width: 6px; height: 100%; background: #ffffff; transform: translateX(-50%); opacity: 0.8; border-right: 2px dashed #000; z-index: 1; }
     
     #rope-group { position: absolute; left: 50%; width: 220px; height: 100%; display: flex; align-items: center; justify-content: space-between; transform: translateX(-50%); transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2; }
@@ -71,6 +77,12 @@
     .avatar-box { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 3px solid #fbbf24; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
     .char-flip { transform: scaleX(-1); }
+
+    /* SPECTATOR BOARD (KHUSUS JURI) */
+    #spectator-panel { display: none; background: #1e293b; border: 2px solid #fbbf24; border-radius: 18px; padding: 15px; text-align: center; color: white; margin-bottom: 8px; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
+    .spectator-title { font-family: 'Titan One', cursive; color: #fbbf24; font-size: 18px; }
+    .stat-box { font-size: 16px; font-weight: 700; background: #0f172a; padding: 10px 20px; border-radius: 12px; border: 1px solid #475569; width: 100%; max-width: 250px; }
+    .btn-reset-match { background: #f59e0b; color: #000; border: none; font-weight: 700; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-family: 'Fredoka', sans-serif; }
 
     /* QUESTION CARD */
     .question-card { background: rgba(30, 41, 59, 0.95); border: 2px solid #6366f1; border-radius: 18px; padding: 12px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-bottom: 8px; }
@@ -99,13 +111,24 @@
       <div class="game-logo">⚔️ TARIK TAMBANG ⚔️</div>
       <input type="number" id="room-code" class="input-room" placeholder="KODE ROOM (cth: 8888)">
       
-      <div class="team-select">
+      <!-- PILIH ROLE -->
+      <div class="role-select">
+        <button id="btn-role-player" class="btn-role active" onclick="pilihRole('player')">🎮 PEMAIN</button>
+        <button id="btn-role-juri" class="btn-role" onclick="pilihRole('juri')">👀 JURI / PENONTON</button>
+      </div>
+
+      <!-- TIM SELECT (KHUSUS PEMAIN) -->
+      <div id="team-select-box" class="team-select">
         <button id="btn-t1" class="btn-team team-1 active" onclick="pilihTim(1)">NARUTO</button>
         <button id="btn-t2" class="btn-team team-2" onclick="pilihTim(2)">SASUKE</button>
       </div>
 
-      <button class="btn-play" onclick="gabungRoom()">MAIN SEKARANG 🚀</button>
-      <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Bank Soal</button>
+      <button class="btn-play" onclick="gabungRoom()">MASUK ROOM 🚀</button>
+      
+      <div class="lobby-action-grid">
+        <button class="btn-editor-trigger" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
+        <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Soal</button>
+      </div>
     </div>
   </div>
 
@@ -138,7 +161,6 @@
       <div class="room-badge">R: <span id="lbl-room" style="color:#fff;">-</span> | <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span></div>
       <div id="waktu" class="timer-badge">10:00</div>
       
-      <!-- TOMBOL KELUAR GAME UNTUK STABILKAN TIMER -->
       <button class="btn-exit-game" onclick="keluarGame()">🚪 Keluar</button>
     </div>
 
@@ -153,13 +175,21 @@
       </div>
     </div>
 
-    <!-- KOTAK SOAL -->
-    <div class="question-card">
+    <!-- TAMPILAN JURI / PENONTON -->
+    <div id="spectator-panel">
+      <div class="spectator-title">📺 MODE JURI / LIVE SPECTATOR</div>
+      <div class="stat-box">POSISI TALI: <span id="lbl-posisi-tali" style="color:#fbbf24;">50%</span></div>
+      <div class="stat-box">STATUS: <span id="lbl-status-unggul" style="color:#60a5fa;">SEIMBANG</span></div>
+      <button class="btn-reset-match" onclick="resetMatchTali()">🔄 Reset Pertandingan</button>
+    </div>
+
+    <!-- KOTAK SOAL (KHUSUS PEMAIN) -->
+    <div id="card-soal-box" class="question-card">
       <p id="teks-soal" class="question-text">Memuat Pertanyaan...</p>
     </div>
 
-    <!-- TOMBOL JAWABAN HD -->
-    <div class="answers-grid">
+    <!-- TOMBOL JAWABAN (KHUSUS PEMAIN) -->
+    <div id="grid-jawaban-box" class="answers-grid">
       <button class="btn-ans ans-naruto" onclick="jawab(0)"><span class="badge-letter">A</span><span id="opt0">-</span></button>
       <button class="btn-ans ans-naruto" onclick="jawab(1)"><span class="badge-letter">B</span><span id="opt1">-</span></button>
       <button class="btn-ans ans-naruto" onclick="jawab(2)"><span class="badge-letter">C</span><span id="opt2">-</span></button>
@@ -191,19 +221,43 @@
     let bankSoal = [];
     let roomID = "";
     let timSaya = 1;
+    let roleSaya = 'player'; // 'player' atau 'juri'
     let roomRef = null;
     let idxSoal = 0;
     let timerInterval = null;
 
-    // Load Soal
+    function pilihRole(role) {
+      roleSaya = role;
+      document.getElementById('btn-role-player').classList.toggle('active', role === 'player');
+      document.getElementById('btn-role-juri').classList.toggle('active', role === 'juri');
+      
+      document.getElementById('team-select-box').style.display = (role === 'player') ? 'flex' : 'none';
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
     function muatSoalDariFirebase() {
       db.ref('bankSoal').on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-          bankSoal = Array.isArray(data) ? data : Object.values(data);
-        } else {
-          bankSoal = [];
-        }
+        bankSoal = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
         renderFormEditor();
       });
     }
@@ -331,14 +385,27 @@
       document.getElementById('lbl-room').innerText = code;
       
       const lblTim = document.getElementById('lbl-tim');
-      lblTim.innerText = timSaya === 1 ? "NARUTO" : "SASUKE";
-      lblTim.style.color = timSaya === 1 ? "#60a5fa" : "#f87171";
+      
+      if (roleSaya === 'juri') {
+        lblTim.innerText = "JURI / SPECTATOR";
+        lblTim.style.color = "#fbbf24";
+        document.getElementById('spectator-panel').style.display = 'flex';
+        document.getElementById('card-soal-box').style.display = 'none';
+        document.getElementById('grid-jawaban-box').style.display = 'none';
+      } else {
+        lblTim.innerText = timSaya === 1 ? "NARUTO" : "SASUKE";
+        lblTim.style.color = timSaya === 1 ? "#60a5fa" : "#f87171";
+        document.getElementById('spectator-panel').style.display = 'none';
+        document.getElementById('card-soal-box').style.display = 'flex';
+        document.getElementById('grid-jawaban-box').style.display = 'grid';
 
-      const btns = document.querySelectorAll('.btn-ans');
-      btns.forEach(b => b.className = `btn-ans ${timSaya === 1 ? 'ans-naruto' : 'ans-sasuke'}`);
+        const btns = document.querySelectorAll('.btn-ans');
+        btns.forEach(b => b.className = `btn-ans ${timSaya === 1 ? 'ans-naruto' : 'ans-sasuke'}`);
 
-      idxSoal = 0;
-      tampilkanSoal();
+        idxSoal = 0;
+        tampilkanSoal();
+      }
+
       inisiatisasiRoom();
     }
 
@@ -359,12 +426,32 @@
 
         document.getElementById('rope-group').style.left = data.posisi + "%";
 
+        if (roleSaya === 'juri') {
+          document.getElementById('lbl-posisi-tali').innerText = data.posisi + "%";
+          const statusLbl = document.getElementById('lbl-status-unggul');
+          if (data.posisi < 50) {
+            statusLbl.innerText = "NARUTO UNGGUL";
+            statusLbl.style.color = "#60a5fa";
+          } else if (data.posisi > 50) {
+            statusLbl.innerText = "SASUKE UNGGUL";
+            statusLbl.style.color = "#f87171";
+          } else {
+            statusLbl.innerText = "SEIMBANG";
+            statusLbl.style.color = "#fbbf24";
+          }
+        }
+
         if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
         else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
       });
     }
 
-    // HITUNG MUNDUR TIMER SANGAT STABIL
+    function resetMatchTali() {
+      if (roomRef) {
+        roomRef.update({ posisi: 50, waktu: 600 });
+      }
+    }
+
     function mulaiHitungMundurStabil() {
       if (timerInterval) clearInterval(timerInterval);
 
@@ -389,7 +476,6 @@
       }, 1000);
     }
 
-    // MEMUTUSKAN KONEKSI ROOM & BERSIHKAN TIMER saat keluar
     function keluarGame() {
       if (roomRef) {
         roomRef.off();
@@ -419,7 +505,7 @@
     }
 
     function jawab(pilihan) {
-      if (bankSoal.length === 0) return;
+      if (bankSoal.length === 0 || roleSaya === 'juri') return;
       let s = bankSoal[idxSoal % bankSoal.length];
       let isBenar = (pilihan === s.jawaban);
       let power = 5;
