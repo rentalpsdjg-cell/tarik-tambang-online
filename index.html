@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tarik Tambang Mabar Online (GitHub)</title>
+  <title>Tarik Tambang Mabar Online</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -33,12 +33,12 @@
     .timer { font-size: 20px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 5px 12px; border-radius: 10px; border: 1px solid #fca5a5; }
 
     .arena-wrapper { padding: 20px; position: relative; display: flex; justify-content: center; }
-    .arena { width: 100%; height: 60px; background: #e2e8f0; border-radius: 30px; position: relative; display: flex; align-items: center; border: 2px solid white; overflow: hidden; }
+    .arena { width: 100%; height: 70px; background: #e2e8f0; border-radius: 35px; position: relative; display: flex; align-items: center; border: 2px solid white; overflow: visible; }
     .garis-tengah { position: absolute; width: 6px; height: 100%; background: #10b981; left: 50%; transform: translateX(-50%); z-index: 1; }
     #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.3s ease-out; z-index: 2; width: 220px; justify-content: space-between; }
     .tali { position: absolute; width: 100%; height: 8px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
     .simpul { width: 20px; height: 25px; background: #f59e0b; border-radius: 5px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
-    .karakter-img { width: 50px; height: 50px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; }
+    .karakter-img { width: 50px; height: 50px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .char-kanan { transform: scaleX(-1); }
 
     .soal-container { padding: 10px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
@@ -46,7 +46,7 @@
     .soal-teks { font-size: 18px; font-weight: 800; color: #1e293b; margin: 0; }
 
     .kontrol-pemain { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 500px; margin: 0 auto; width: 90%; }
-    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 12px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 14px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .btn-naruto-theme { background: var(--gradient-left); }
     .btn-sasuke-theme { background: var(--gradient-right); }
 
@@ -94,7 +94,7 @@
 
     <div class="soal-container">
       <div class="soal-box">
-        <p id="teks-soal" class="soal-teks">Menyiapkan Permainan...</p>
+        <p id="teks-soal" class="soal-teks">Memuat soal...</p>
       </div>
     </div>
 
@@ -115,7 +115,7 @@
   </div>
 
   <script>
-    // FIREBASE CONFIG
+    // KONFIGURASI FIREBASE REALTIME DATABASE
     const firebaseConfig = {
       apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
       authDomain: "tarik-tambang-all-in.firebaseapp.com",
@@ -128,13 +128,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // BANK SOAL LANGSUNG DI KODE (BISA BOSQ TAMBAH/EDIT SENDIRI)
+    // BANK SOAL LANGSUNG
     const bankSoal = [
       { soal: "Berapakah hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], jawaban: 2 },
-      { soal: "Ibu kota negara Indonesia adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 },
+      { soal: "Ibu kota negara Indonesia saat ini adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 },
       { soal: "Lambang negara Indonesia adalah...", opsi: ["Harimau", "Garuda", "Banteng", "Komodo"], jawaban: 1 },
       { soal: "Semboyan negara Indonesia adalah...", opsi: ["Bhinneka Tunggal Ika", "Tut Wuri Handayani", "Pancasila", "NKRI"], jawaban: 0 },
-      { soal: "Siapakah presiden pertama Indonesia?", opsi: ["Soeharto", "B.J. Habibie", "Ir. Soekarno", "Jokowi"], jawaban: 2 }
+      { soal: "Siapakah presiden pertama Republik Indonesia?", opsi: ["Soeharto", "B.J. Habibie", "Ir. Soekarno", "Jokowi"], jawaban: 2 }
     ];
 
     let roomID = "";
@@ -193,14 +193,16 @@
 
         indeksSoal = data.indeksSoal;
         let sCur = bankSoal[indeksSoal];
-        document.getElementById('teks-soal').innerText = sCur.soal;
-        document.getElementById('opsi0').innerText = "A. " + sCur.opsi[0];
-        document.getElementById('opsi1').innerText = "B. " + sCur.opsi[1];
-        document.getElementById('opsi2').innerText = "C. " + sCur.opsi[2];
-        document.getElementById('opsi3').innerText = "D. " + sCur.opsi[3];
+        if (sCur) {
+          document.getElementById('teks-soal').innerText = sCur.soal;
+          document.getElementById('opsi0').innerText = "A. " + sCur.opsi[0];
+          document.getElementById('opsi1').innerText = "B. " + sCur.opsi[1];
+          document.getElementById('opsi2').innerText = "C. " + sCur.opsi[2];
+          document.getElementById('opsi3').innerText = "D. " + sCur.opsi[3];
+        }
 
-        if (data.posisi <= 5) akhiriGame("🏆 TIM NARUTO MENANG!");
-        else if (data.posisi >= 95) akhiriGame("🏆 TIM SASUKE MENANG!");
+        if (data.posisi <= 10) akhiriGame("🏆 TIM NARUTO MENANG!");
+        else if (data.posisi >= 90) akhiriGame("🏆 TIM SASUKE MENANG!");
       });
 
       setInterval(() => {
@@ -211,7 +213,7 @@
     function jawab(indexPilihan) {
       let sCur = bankSoal[indeksSoal];
       let isBenar = (indexPilihan === sCur.jawaban);
-      let power = 4;
+      let power = 5;
 
       roomRef.transaction((data) => {
         if (data) {
