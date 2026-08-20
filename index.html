@@ -41,8 +41,21 @@
     .btn-play { width: 100%; padding: 14px; border: none; border-radius: 16px; background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; font-family: 'Titan One', cursive; font-size: 16px; text-shadow: 1px 2px 0 #000; box-shadow: 0 5px 0 #166534; cursor: pointer; margin-bottom: 10px; }
     .btn-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #166534; }
     
-    .lobby-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .lobby-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    
+    /* TOMBOL CARA MAIN FITUR BARU */
+    .btn-guide-trigger { width: 100%; background: #0284c7; border: 2px solid #38bdf8; color: #ffffff; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 0 #0369a1; }
+    .btn-guide-trigger:active { transform: translateY(2px); box-shadow: 0 1px 0 #0369a1; }
+
+    /* MODAL CARA MAIN BARU */
+    .modal-guide { position: fixed; inset: 0; z-index: 400; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; padding: 20px; }
+    .guide-card { background: #1e293b; border: 3px solid #38bdf8; border-radius: 24px; padding: 20px; width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto; color: white; text-align: left; }
+    .guide-title { font-family: 'Titan One', cursive; color: #38bdf8; font-size: 18px; text-align: center; margin-bottom: 12px; }
+    .guide-section { background: #0f172a; border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 1px solid #334155; font-size: 12px; }
+    .guide-section h4 { color: #fbbf24; margin-bottom: 5px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+    .guide-section ul { padding-left: 18px; }
+    .guide-section li { margin-bottom: 4px; line-height: 1.4; }
 
     /* EDITOR BANK SOAL */
     .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
@@ -133,6 +146,43 @@
         <button class="btn-editor-trigger" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
         <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Soal</button>
       </div>
+
+      <!-- TOMBOL BARU: CARA MAIN -->
+      <button class="btn-guide-trigger" onclick="bukaModalCaraMain()">📖 Cara Main</button>
+    </div>
+  </div>
+
+  <!-- MODAL BARU: POP-UP PANDUAN CARA MAIN -->
+  <div id="modal-guide" class="modal-guide">
+    <div class="guide-card">
+      <div class="guide-title">📖 CARA BERMAIN</div>
+      
+      <div class="guide-section">
+        <h4>🎯 Tujuan Utama Game</h4>
+        <p>Tarik tali tambang ke arah tim kamu sampai batas maksimal (15% / 85%) atau unggul saat timer 10 menit habis!</p>
+      </div>
+
+      <div class="guide-section">
+        <h4>🎮 Panduan Pemain (Siswa)</h4>
+        <ul>
+          <li>Pilih <strong>🎮 PEMAIN</strong> lalu pilih tim (<strong>NARUTO</strong> atau <strong>SASUKE</strong>).</li>
+          <li>Jawab kuis di HP secepat dan setepat mungkin.</li>
+          <li><strong>Jawaban BENAR:</strong> Menarik tali ke arah timmu (+5%).</li>
+          <li><strong>Jawaban SALAH:</strong> Tali ditarik mundur ke arah lawan (-3%).</li>
+          <li><strong>🔥 Mode Combo 2X:</strong> Jawab BENAR 2x berturut-turut untuk mengaktifkan kekuatan ganda (+10%)!</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h4>👀 Panduan Juri / Host (Guru)</h4>
+        <ul>
+          <li>Pilih <strong>👀 JURI / PENONTON</strong> lalu bagikan layar (Share Screen) di Zoom/Meet.</li>
+          <li>Pastikan centang <em>"Share Tab Audio"</em> agar efek suara permainan terdengar seluruh kelas.</li>
+          <li>Gunakan tombol emoji di bawah layar untuk memberikan sorakan live!</li>
+        </ul>
+      </div>
+
+      <button class="btn-play" style="margin-top: 10px; padding: 10px; font-size: 14px;" onclick="tutupModalCaraMain()">PAHAM & TUTUP 🚀</button>
     </div>
   </div>
 
@@ -281,6 +331,15 @@
     let idxSoal = 0;
     let timerInterval = null;
     let comboCount = 0;
+
+    /* FUNGSI BARU UNTUK BUKA/TUTUP MODAL CARA MAIN */
+    function bukaModalCaraMain() {
+      document.getElementById('modal-guide').style.display = 'flex';
+    }
+
+    function tutupModalCaraMain() {
+      document.getElementById('modal-guide').style.display = 'none';
+    }
 
     function pilihRole(role) {
       roleSaya = role;
