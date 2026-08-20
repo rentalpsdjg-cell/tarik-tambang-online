@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tarik Tambang Arena HD + Mode Juri</title>
+  <title>Tarik Tambang Arena HD - Live Edition</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -14,13 +14,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
     html, body { width: 100%; height: 100dvh; overflow: hidden; font-family: 'Fredoka', sans-serif; background: #0f172a; }
     
+    /* EMOJI CANVAS MELAYANG */
+    #emoji-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+    .floating-emoji { position: absolute; bottom: -50px; font-size: 36px; animation: floatUp 2.5s linear forwards; }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.8); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+    }
+
     /* MENU LOBBY PRO */
     #main-menu { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); padding: 20px; }
     .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 25px 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-    .game-logo { font-family: 'Titan One', cursive; font-size: 24px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 12px; }
+    .game-logo { font-family: 'Titan One', cursive; font-size: 22px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 12px; }
     .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 12px; }
     
-    /* SELEKSI ROLE (PEMAIN / JURI) */
     .role-select { display: flex; gap: 8px; margin-bottom: 12px; background: #0f172a; padding: 4px; border-radius: 12px; }
     .btn-role { flex: 1; padding: 8px; border-radius: 10px; border: none; font-weight: 700; font-size: 12px; color: #94a3b8; background: transparent; cursor: pointer; }
     .btn-role.active { background: #6366f1; color: white; }
@@ -37,59 +44,55 @@
     .lobby-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
-    /* MODAL EDITOR BANK SOAL */
+    /* EDITOR BANK SOAL */
     .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
     .modal-header { background: #3b82f6; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
     .modal-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
     .modal-body { flex: 1; padding: 15px; overflow-y: auto; background: #0f172a; }
-    
     .editor-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-    .btn-tool { padding: 10px 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-blue { background: #3b82f6; }
-    .btn-orange { background: #f59e0b; border: 2px solid #000; color: #000; }
-    .btn-red { background: #ef4444; color: white; }
-    .btn-green { background: #10b981; margin-left: auto; }
-
+    .btn-tool { padding: 10px 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; color: white; cursor: pointer; }
+    .btn-blue { background: #3b82f6; } .btn-orange { background: #f59e0b; color: #000; } .btn-red { background: #ef4444; } .btn-green { background: #10b981; margin-left: auto; }
     .soal-item-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; margin-bottom: 10px; color: white; }
     .soal-item-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #fbbf24; font-weight: 700; }
     .input-edit { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 12px; margin-bottom: 6px; }
     .grid-opsi { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
-    /* LAYOUT GAME MOBILE ARENA */
+    /* GAME ARENA MAIN */
     #game-container { display: none; flex-direction: column; width: 100vw; height: 100dvh; background: linear-gradient(180deg, #0284c7 0%, #0f172a 100%); justify-content: space-between; padding: max(10px, env(safe-area-inset-top)) 12px max(15px, env(safe-area-inset-bottom)) 12px; }
 
-    /* TOP BAR STATS */
     .top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); gap: 6px; }
     .room-badge { font-weight: 700; color: #93c5fd; font-size: 12px; }
     .timer-badge { font-family: 'Titan One', cursive; color: #f87171; background: #450a0a; padding: 4px 10px; border-radius: 12px; border: 2px solid #ef4444; font-size: 13px; }
-    
-    .btn-exit-game { background: #dc2626; border: 1px solid #f87171; color: white; border-radius: 10px; padding: 5px 10px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    .btn-exit-game:active { transform: scale(0.95); }
+    .btn-exit-game { background: #dc2626; border: 1px solid #f87171; color: white; border-radius: 10px; padding: 5px 10px; font-weight: 700; font-size: 11px; cursor: pointer; }
 
-    /* STADIUM ARENA */
-    .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 110px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.3); margin: 8px 0; }
+    .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 110px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4); margin: 8px 0; }
     .center-line { position: absolute; left: 50%; width: 6px; height: 100%; background: #ffffff; transform: translateX(-50%); opacity: 0.8; border-right: 2px dashed #000; z-index: 1; }
     
-    #rope-group { position: absolute; left: 50%; width: 220px; height: 100%; display: flex; align-items: center; justify-content: space-between; transform: translateX(-50%); transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2; }
+    #rope-group { position: absolute; left: 50%; width: 220px; height: 100%; display: flex; align-items: center; justify-content: space-between; transform: translateX(-50%); transition: left 0.3s ease-out; z-index: 2; }
     .rope { position: absolute; width: 100%; height: 8px; background: #d97706; border: 2px solid #78350f; border-radius: 4px; top: 50%; transform: translateY(-50%); z-index: -1; }
     .ribbon { position: absolute; left: 50%; width: 14px; height: 26px; background: #ef4444; border: 2px solid #fff; border-radius: 4px; transform: translateX(-50%); z-index: 3; }
 
-    .avatar-box { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 3px solid #fbbf24; box-shadow: 0 4px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .avatar-box { width: 50px; height: 50px; background: #fff; border-radius: 50%; border: 3px solid #fbbf24; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
     .char-flip { transform: scaleX(-1); }
 
     /* SPECTATOR BOARD (KHUSUS JURI) */
-    #spectator-panel { display: none; background: #1e293b; border: 2px solid #fbbf24; border-radius: 18px; padding: 15px; text-align: center; color: white; margin-bottom: 8px; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
-    .spectator-title { font-family: 'Titan One', cursive; color: #fbbf24; font-size: 18px; }
-    .stat-box { font-size: 16px; font-weight: 700; background: #0f172a; padding: 10px 20px; border-radius: 12px; border: 1px solid #475569; width: 100%; max-width: 250px; }
-    .btn-reset-match { background: #f59e0b; color: #000; border: none; font-weight: 700; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-family: 'Fredoka', sans-serif; }
+    #spectator-panel { display: none; background: #1e293b; border: 2px solid #fbbf24; border-radius: 18px; padding: 12px; text-align: center; color: white; margin-bottom: 8px; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 8px; }
+    .spectator-title { font-family: 'Titan One', cursive; color: #fbbf24; font-size: 16px; }
+    .stat-box { font-size: 14px; font-weight: 700; background: #0f172a; padding: 6px 15px; border-radius: 10px; border: 1px solid #475569; width: 100%; max-width: 260px; }
+    
+    .reaction-bar { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-react { background: #334155; border: 1px solid #64748b; font-size: 20px; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.1s; }
+    .btn-react:active { transform: scale(1.2); }
+
+    #combo-badge { display: none; background: #f59e0b; color: #000; font-family: 'Titan One', cursive; font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
 
     /* QUESTION CARD */
     .question-card { background: rgba(30, 41, 59, 0.95); border: 2px solid #6366f1; border-radius: 18px; padding: 12px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-bottom: 8px; }
     .question-text { color: #ffffff; font-size: 14px; font-weight: 700; line-height: 1.3; }
 
-    /* 4 OPTION BUTTONS JUMBO */
-    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 170px; }
+    /* 4 OPTION BUTTONS */
+    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 160px; }
     .btn-ans { border: none; border-radius: 16px; padding: 10px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; text-align: left; cursor: pointer; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
     .btn-ans:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
     .badge-letter { font-family: 'Titan One', cursive; background: rgba(0,0,0,0.25); width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
@@ -105,19 +108,20 @@
 </head>
 <body>
 
+  <!-- EMOJI CANVAS -->
+  <div id="emoji-canvas"></div>
+
   <!-- LOBBY MAIN MENU -->
   <div id="main-menu">
     <div class="lobby-card">
-      <div class="game-logo">⚔️ TARIK TAMBANG ⚔️</div>
+      <div class="game-logo">⚔️ TARIK TAMBANG ARENA ⚔️</div>
       <input type="number" id="room-code" class="input-room" placeholder="KODE ROOM (cth: 8888)">
       
-      <!-- PILIH ROLE -->
       <div class="role-select">
         <button id="btn-role-player" class="btn-role active" onclick="pilihRole('player')">🎮 PEMAIN</button>
         <button id="btn-role-juri" class="btn-role" onclick="pilihRole('juri')">👀 JURI / PENONTON</button>
       </div>
 
-      <!-- TIM SELECT (KHUSUS PEMAIN) -->
       <div id="team-select-box" class="team-select">
         <button id="btn-t1" class="btn-team team-1 active" onclick="pilihTim(1)">NARUTO</button>
         <button id="btn-t2" class="btn-team team-2" onclick="pilihTim(2)">SASUKE</button>
@@ -140,17 +144,14 @@
     </div>
     <div class="modal-body">
       <div class="editor-toolbar">
-        <button class="btn-tool btn-blue" onclick="tambahBarisSoal()">+ Tambah Soal (Max 20)</button>
-        
+        <button class="btn-tool btn-blue" onclick="tambahBarisSoal()">+ Tambah Soal</button>
         <label class="btn-tool btn-orange" style="cursor:pointer;">
-          📁 Upload File CSV
+          📁 Import CSV
           <input type="file" id="input-csv" accept=".csv" style="display:none;" onchange="bacaFileCSV(event)">
         </label>
-
-        <button class="btn-tool btn-red" onclick="resetSemuaSoal()">🗑 Reset Semua Soal</button>
-        <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan ke Database</button>
+        <button class="btn-tool btn-red" onclick="resetSemuaSoal()">🗑 Reset</button>
+        <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan Ke Database</button>
       </div>
-
       <div id="list-soal-container"></div>
     </div>
   </div>
@@ -158,9 +159,12 @@
   <!-- GAME ARENA MAIN -->
   <div id="game-container">
     <div class="top-bar">
-      <div class="room-badge">R: <span id="lbl-room" style="color:#fff;">-</span> | <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span></div>
+      <div class="room-badge">
+        R: <span id="lbl-room" style="color:#fff;">-</span> | 
+        <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span>
+        <span id="combo-badge">🔥 2X COMBO!</span>
+      </div>
       <div id="waktu" class="timer-badge">10:00</div>
-      
       <button class="btn-exit-game" onclick="keluarGame()">🚪 Keluar</button>
     </div>
 
@@ -180,15 +184,24 @@
       <div class="spectator-title">📺 MODE JURI / LIVE SPECTATOR</div>
       <div class="stat-box">POSISI TALI: <span id="lbl-posisi-tali" style="color:#fbbf24;">50%</span></div>
       <div class="stat-box">STATUS: <span id="lbl-status-unggul" style="color:#60a5fa;">SEIMBANG</span></div>
-      <button class="btn-reset-match" onclick="resetMatchTali()">🔄 Reset Pertandingan</button>
+      
+      <div style="font-size:11px; color:#94a3b8; margin-top:2px;">KIRIM EMOJI LIVE:</div>
+      <div class="reaction-bar">
+        <button class="btn-react" onclick="kirimReaksi('👏')">👏</button>
+        <button class="btn-react" onclick="kirimReaksi('🔥')">🔥</button>
+        <button class="btn-react" onclick="kirimReaksi('🎉')">🎉</button>
+        <button class="btn-react" onclick="kirimReaksi('💣')">💣</button>
+      </div>
+
+      <button class="btn-play" style="margin-top:8px; padding:8px; font-size:12px; max-width:200px;" onclick="resetMatchTali()">🔄 Reset Pertandingan</button>
     </div>
 
-    <!-- KOTAK SOAL (KHUSUS PEMAIN) -->
+    <!-- KOTAK SOAL -->
     <div id="card-soal-box" class="question-card">
       <p id="teks-soal" class="question-text">Memuat Pertanyaan...</p>
     </div>
 
-    <!-- TOMBOL JAWABAN (KHUSUS PEMAIN) -->
+    <!-- TOMBOL JAWABAN -->
     <div id="grid-jawaban-box" class="answers-grid">
       <button class="btn-ans ans-naruto" onclick="jawab(0)"><span class="badge-letter">A</span><span id="opt0">-</span></button>
       <button class="btn-ans ans-naruto" onclick="jawab(1)"><span class="badge-letter">B</span><span id="opt1">-</span></button>
@@ -206,6 +219,48 @@
   </div>
 
   <script>
+    /* WEB AUDIO SYNTHESIZER (TANPA DEPENDENCY MP3 LUAR) */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSFX(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+      } else if (type === 'cheer') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      } else if (type === 'win') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+      }
+    }
+
     const firebaseConfig = {
       apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
       authDomain: "tarik-tambang-all-in.firebaseapp.com",
@@ -221,36 +276,24 @@
     let bankSoal = [];
     let roomID = "";
     let timSaya = 1;
-    let roleSaya = 'player'; // 'player' atau 'juri'
+    let roleSaya = 'player';
     let roomRef = null;
     let idxSoal = 0;
     let timerInterval = null;
+    let comboCount = 0;
 
     function pilihRole(role) {
       roleSaya = role;
       document.getElementById('btn-role-player').classList.toggle('active', role === 'player');
       document.getElementById('btn-role-juri').classList.toggle('active', role === 'juri');
-      
       document.getElementById('team-select-box').style.display = (role === 'player') ? 'flex' : 'none';
     }
 
     function toggleFullScreen() {
-      if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-          document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
       } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
+        document.exitFullscreen().catch(() => {});
       }
     }
 
@@ -263,77 +306,48 @@
     }
     muatSoalDariFirebase();
 
-    /* EDITOR BANK SOAL */
     function bukaEditorSoal() { document.getElementById('modal-editor').style.display = 'flex'; }
     function tutupEditorSoal() { document.getElementById('modal-editor').style.display = 'none'; }
 
     function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
       container.innerHTML = '';
-
       if (bankSoal.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:30px; font-size:14px;">Belum ada soal. Klik "+ Tambah Soal" atau "Upload File CSV".</div>';
+        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:30px; font-size:14px;">Belum ada soal. Klik "+ Tambah Soal" atau "Import CSV".</div>';
         return;
       }
-
       bankSoal.forEach((s, idx) => {
         const card = document.createElement('div');
         card.className = 'soal-item-card';
         card.innerHTML = `
-          <div class="soal-item-header">
-            <span>SOAL #${idx + 1}</span>
-            <span style="color:#ef4444; cursor:pointer;" onclick="hapusSoal(${idx})">🗑 Hapus</span>
-          </div>
-          <input type="text" class="input-edit" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Tulis Pertanyaan...">
+          <div class="soal-item-header"><span>SOAL #${idx + 1}</span><span style="color:#ef4444; cursor:pointer;" onclick="hapusSoal(${idx})">🗑 Hapus</span></div>
+          <input type="text" class="input-edit" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Pertanyaan...">
           <div class="grid-opsi">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="Opsi A">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="Opsi B">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="Opsi C">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="Opsi D">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="A">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="B">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="C">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="D">
           </div>
-          <input type="number" class="input-edit" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" placeholder="Kunci Jawaban (0=A, 1=B, 2=C, 3=D)" min="0" max="3">
+          <input type="number" class="input-edit" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" placeholder="Kunci (0=A, 1=B, 2=C, 3=D)" min="0" max="3">
         `;
         container.appendChild(card);
       });
     }
 
-    function tambahBarisSoal() {
-      if (bankSoal.length >= 20) { alert("Maksimal 20 Soal!"); return; }
-      bankSoal.push({ soal: "", opsi: ["", "", "", ""], jawaban: 0 });
-      renderFormEditor();
-    }
-
-    function hapusSoal(idx) {
-      bankSoal.splice(idx, 1);
-      renderFormEditor();
-    }
-
-    function resetSemuaSoal() {
-      if (confirm("Apakah bosq yakin ingin MENGHAPUS SEMUA SOAL?")) {
-        bankSoal = [];
-        db.ref('bankSoal').remove().then(() => {
-          renderFormEditor();
-          alert("🗑 Seluruh soal berhasil dikosongkan!");
-        });
-      }
-    }
-
+    function tambahBarisSoal() { bankSoal.push({ soal: "", opsi: ["", "", "", ""], jawaban: 0 }); renderFormEditor(); }
+    function hapusSoal(idx) { bankSoal.splice(idx, 1); renderFormEditor(); }
+    function resetSemuaSoal() { if (confirm("Hapus semua soal?")) { bankSoal = []; db.ref('bankSoal').remove().then(() => renderFormEditor()); } }
     function updateDataSoal(idx, key, val) { bankSoal[idx][key] = val; }
-    function updateDataOpsi(idx, opsiIdx, val) {
-      if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["", "", "", ""];
-      bankSoal[idx].opsi[opsiIdx] = val;
-    }
+    function updateDataOpsi(idx, opsiIdx, val) { if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["","","",""]; bankSoal[idx].opsi[opsiIdx] = val; }
 
     function bacaFileCSV(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(evt) {
         const text = evt.target.result;
         const baris = text.split('\n');
         let hasilSoal = [];
-
         baris.forEach(row => {
           if (row.trim() !== '') {
             const col = row.split(',');
@@ -346,7 +360,6 @@
             }
           }
         });
-
         if (hasilSoal.length > 0) {
           bankSoal = hasilSoal;
           renderFormEditor();
@@ -359,13 +372,9 @@
     }
 
     function simpanKeDatabase() {
-      db.ref('bankSoal').set(bankSoal).then(() => {
-        alert("✅ Berhasil menyimpan Bank Soal ke Cloud!");
-        tutupEditorSoal();
-      });
+      db.ref('bankSoal').set(bankSoal).then(() => { alert("✅ Bank Soal Disimpan!"); tutupEditorSoal(); });
     }
 
-    /* SISTEM GAMEPLAY STABIL */
     function pilihTim(t) {
       timSaya = t;
       document.getElementById('btn-t1').classList.toggle('active', t === 1);
@@ -402,6 +411,8 @@
         const btns = document.querySelectorAll('.btn-ans');
         btns.forEach(b => b.className = `btn-ans ${timSaya === 1 ? 'ans-naruto' : 'ans-sasuke'}`);
 
+        comboCount = 0;
+        updateComboBadge();
         idxSoal = 0;
         tampilkanSoal();
       }
@@ -412,7 +423,7 @@
     function inisiatisasiRoom() {
       roomRef.get().then((snapshot) => {
         if (!snapshot.exists()) {
-          roomRef.set({ posisi: 50, waktu: 600 });
+          roomRef.set({ posisi: 50, waktu: 600, reaction: '' });
         }
         dengarkanServer();
         mulaiHitungMundurStabil();
@@ -426,19 +437,16 @@
 
         document.getElementById('rope-group').style.left = data.posisi + "%";
 
+        if (data.reaction) {
+          tampilkanFloatingEmoji(data.reaction);
+        }
+
         if (roleSaya === 'juri') {
           document.getElementById('lbl-posisi-tali').innerText = data.posisi + "%";
           const statusLbl = document.getElementById('lbl-status-unggul');
-          if (data.posisi < 50) {
-            statusLbl.innerText = "NARUTO UNGGUL";
-            statusLbl.style.color = "#60a5fa";
-          } else if (data.posisi > 50) {
-            statusLbl.innerText = "SASUKE UNGGUL";
-            statusLbl.style.color = "#f87171";
-          } else {
-            statusLbl.innerText = "SEIMBANG";
-            statusLbl.style.color = "#fbbf24";
-          }
+          if (data.posisi < 50) { statusLbl.innerText = "NARUTO UNGGUL"; statusLbl.style.color = "#60a5fa"; }
+          else if (data.posisi > 50) { statusLbl.innerText = "SASUKE UNGGUL"; statusLbl.style.color = "#f87171"; }
+          else { statusLbl.innerText = "SEIMBANG"; statusLbl.style.color = "#fbbf24"; }
         }
 
         if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
@@ -446,18 +454,31 @@
       });
     }
 
-    function resetMatchTali() {
+    function kirimReaksi(emoji) {
       if (roomRef) {
-        roomRef.update({ posisi: 50, waktu: 600 });
+        roomRef.child('reaction').set(emoji + "_" + Date.now());
       }
+    }
+
+    function tampilkanFloatingEmoji(strData) {
+      const emoji = strData.split('_')[0];
+      const el = document.createElement('div');
+      el.className = 'floating-emoji';
+      el.innerText = emoji;
+      el.style.left = (10 + Math.random() * 80) + "vw";
+      document.getElementById('emoji-canvas').appendChild(el);
+      playSFX('cheer');
+      setTimeout(() => el.remove(), 2500);
+    }
+
+    function resetMatchTali() {
+      if (roomRef) roomRef.update({ posisi: 50, waktu: 600 });
     }
 
     function mulaiHitungMundurStabil() {
       if (timerInterval) clearInterval(timerInterval);
-
       timerInterval = setInterval(() => {
         if (!roomRef) return;
-
         roomRef.child('waktu').transaction((wkt) => {
           if (wkt === null) return 600;
           return wkt > 0 ? wkt - 1 : 0;
@@ -467,25 +488,15 @@
             let m = Math.floor(totalSec / 60);
             let s = totalSec % 60;
             document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-
-            if (totalSec <= 0) {
-              akhiriGame("⏰ WAKTU HABIS!");
-            }
+            if (totalSec <= 0) akhiriGame("⏰ WAKTU HABIS!");
           }
         });
       }, 1000);
     }
 
     function keluarGame() {
-      if (roomRef) {
-        roomRef.off();
-        roomRef = null;
-      }
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-
+      if (roomRef) { roomRef.off(); roomRef = null; }
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
       document.getElementById('game-container').style.display = 'none';
       document.getElementById('overlay-menang').style.display = 'none';
       document.getElementById('main-menu').style.display = 'flex';
@@ -493,7 +504,7 @@
 
     function tampilkanSoal() {
       if (bankSoal.length === 0) {
-        document.getElementById('teks-soal').innerText = "Belum ada soal di database! Silakan upload dulu.";
+        document.getElementById('teks-soal').innerText = "Belum ada soal! Silakan isi dulu di Editor Soal.";
         return;
       }
       let s = bankSoal[idxSoal % bankSoal.length];
@@ -504,18 +515,39 @@
       document.getElementById('opt3').innerText = s.opsi ? s.opsi[3] : "";
     }
 
+    function updateComboBadge() {
+      const badge = document.getElementById('combo-badge');
+      if (comboCount >= 2) {
+        badge.innerText = `🔥 ${comboCount}X COMBO (2X POWER)!`;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
     function jawab(pilihan) {
       if (bankSoal.length === 0 || roleSaya === 'juri') return;
       let s = bankSoal[idxSoal % bankSoal.length];
       let isBenar = (pilihan === s.jawaban);
-      let power = 5;
+      
+      let basePower = 5;
+      if (isBenar) {
+        playSFX('correct');
+        comboCount++;
+        if (comboCount >= 2) basePower *= 2;
+      } else {
+        playSFX('wrong');
+        comboCount = 0;
+      }
+
+      updateComboBadge();
 
       roomRef.child('posisi').transaction((posSekarang) => {
         if (posSekarang === null) return 50;
         if (isBenar) {
-          return timSaya === 1 ? posSekarang - power : posSekarang + power;
+          return timSaya === 1 ? posSekarang - basePower : posSekarang + basePower;
         } else {
-          return timSaya === 1 ? posSekarang + power : posSekarang - power;
+          return timSaya === 1 ? posSekarang + 3 : posSekarang - 3;
         }
       });
 
@@ -525,6 +557,7 @@
 
     function akhiriGame(pesan) {
       if (timerInterval) clearInterval(timerInterval);
+      playSFX('win');
       document.getElementById('teks-menang').innerText = pesan;
       document.getElementById('overlay-menang').style.display = "flex";
     }
