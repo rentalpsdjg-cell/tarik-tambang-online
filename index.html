@@ -2,63 +2,63 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tarik Tambang Mabar Online</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
     
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background: #0f172a; color: #1e293b; }
+    html, body { width: 100%; height: 100dvh; overflow: hidden; font-family: 'Poppins', sans-serif; background: #0f172a; }
     
     /* MENU UTAMA */
     #main-menu { position: fixed; inset: 0; z-index: 50; display: flex; justify-content: center; align-items: center; background: rgba(15, 23, 42, 0.98); padding: 20px; }
-    .menu-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); text-align: center; width: 100%; max-width: 340px; color: white; }
-    .menu-title { font-size: 20px; font-weight: 800; margin-bottom: 5px; }
-    .input-room { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #3b82f6; font-size: 16px; text-align: center; font-weight: 800; margin: 10px 0; outline: none; background: #fff; }
-    .team-select { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
+    .menu-card { background: rgba(255,255,255,0.08); padding: 25px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); text-align: center; width: 100%; max-width: 340px; color: white; }
+    .menu-title { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+    .input-room { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #3b82f6; font-size: 18px; text-align: center; font-weight: 800; margin: 12px 0; outline: none; background: #fff; }
+    .team-select { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
     .btn-team { flex: 1; padding: 10px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-weight: 800; color: white; opacity: 0.5; font-size: 13px; }
     .btn-team.active { opacity: 1; border-color: white; }
     .team-naruto { background: linear-gradient(135deg, #60a5fa, #2563eb); }
     .team-sasuke { background: linear-gradient(135deg, #f87171, #dc2626); }
-    .btn-main { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 800; color: white; cursor: pointer; background: #10b981; }
+    .btn-main { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; color: white; cursor: pointer; background: #10b981; }
     
-    /* CONTAINER GAME FLEXIBEL ALL-DEVICE */
-    #game-container { display: none; flex-direction: column; width: 100vw; height: 100vh; height: 100dvh; background: #f1f5f9; justify-content: space-between; padding-bottom: env(safe-area-inset-bottom); }
+    /* GAME LAYOUT (PAS 1 SCREEN HP) */
+    #game-container { display: none; flex-direction: column; width: 100vw; height: 100dvh; background: #f1f5f9; justify-content: space-between; }
     
     .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); height: 50px; }
-    .room-info { font-weight: 800; color: #475569; font-size: 12px; }
-    .timer { font-size: 15px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fca5a5; }
+    .room-info { font-weight: 800; color: #475569; font-size: 13px; }
+    .timer { font-size: 16px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 3px 10px; border-radius: 6px; border: 1px solid #fca5a5; }
 
-    /* ARENA TALI */
-    .arena-wrapper { padding: 10px 15px; width: 100%; display: flex; justify-content: center; }
-    .arena { width: 100%; height: 40px; background: #cbd5e1; border-radius: 20px; position: relative; display: flex; align-items: center; border: 2px solid white; }
+    /* ARENA KARAKTER LEBIH LEPAS & PRESISI */
+    .arena-wrapper { padding: 15px; width: 100%; display: flex; justify-content: center; }
+    .arena { width: 100%; height: 60px; background: #cbd5e1; border-radius: 30px; position: relative; display: flex; align-items: center; border: 3px solid white; overflow: hidden; }
     .garis-tengah { position: absolute; width: 4px; height: 100%; background: #10b981; left: 50%; transform: translateX(-50%); z-index: 1; }
     
-    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.2s ease-out; z-index: 2; width: 150px; justify-content: space-between; }
-    .tali { position: absolute; width: 100%; height: 6px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
-    .simpul { width: 12px; height: 18px; background: #f59e0b; border-radius: 3px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
-    .karakter-img { width: 38px; height: 38px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.25s ease-out; z-index: 2; width: 220px; justify-content: space-between; }
+    .tali { position: absolute; width: 100%; height: 8px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
+    .simpul { width: 14px; height: 22px; background: #f59e0b; border-radius: 3px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
+    .karakter-img { width: 48px; height: 48px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
     .char-kanan { transform: scaleX(-1); }
 
-    /* SOAL */
+    /* KOTAK SOAL */
     .soal-container { padding: 5px 15px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; }
-    .soal-box { background: white; padding: 15px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; border-top: 4px solid #8b5cf6; max-height: 120px; display: flex; align-items: center; justify-content: center; overflow-y: auto; }
-    .soal-teks { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0; line-height: 1.3; }
+    .soal-box { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; border-top: 5px solid #8b5cf6; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+    .soal-teks { font-size: 15px; font-weight: 800; color: #1e293b; margin: 0; line-height: 1.3; }
 
-    /* TOMBOL JAWABAN */
-    .kontrol-pemain { padding: 10px 15px 15px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-    .btn-opsi { border: none; border-radius: 10px; cursor: pointer; padding: 12px 6px; color: white; font-family: 'Poppins'; font-weight: 700; font-size: 13px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); text-align: center; display: flex; align-items: center; justify-content: center; min-height: 48px; }
-    .btn-opsi:active { transform: scale(0.96); }
+    /* TOMBOL JAWABAN JUMBO KHUSUS HP */
+    .kontrol-pemain { padding: 10px 15px 20px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+    .btn-opsi { border: none; border-radius: 14px; cursor: pointer; padding: 18px 10px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); text-align: center; display: flex; align-items: center; justify-content: center; min-height: 60px; }
+    .btn-opsi:active { transform: scale(0.95); opacity: 0.9; }
     .btn-naruto-theme { background: linear-gradient(135deg, #60a5fa, #2563eb); }
     .btn-sasuke-theme { background: linear-gradient(135deg, #f87171, #dc2626); }
 
-    /* OVERLAY HASIL */
+    /* OVERLAY MENANG */
     .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; color: white; }
-    .win-box { background: white; color: #1e293b; padding: 20px; border-radius: 16px; text-align: center; width: 80%; max-width: 300px; }
+    .win-box { background: white; color: #1e293b; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 320px; }
   </style>
 </head>
 <body>
@@ -67,7 +67,7 @@
   <div id="main-menu">
     <div class="menu-card">
       <h1 class="menu-title">🌐 Tarik Tambang</h1>
-      <p style="color: #94a3b8; font-size: 11px;">Kode Room Sama:</p>
+      <p style="color: #94a3b8; font-size: 11px;">Masukkan Kode Room Sama:</p>
       
       <input type="number" id="room-code" class="input-room" placeholder="Contoh: 1234">
       
@@ -116,7 +116,7 @@
   <!-- OVERLAY MENANG -->
   <div id="overlay-menang" class="overlay">
     <div class="win-box">
-      <h2 id="teks-menang" style="font-size: 18px; margin-bottom: 12px;">Pemenang!</h2>
+      <h2 id="teks-menang" style="font-size: 20px; margin-bottom: 15px;">Pemenang!</h2>
       <button class="btn-main" onclick="window.location.reload()">🏠 Main Lagi</button>
     </div>
   </div>
