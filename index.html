@@ -5,64 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tarik Tambang Mabar Online</title>
   
+  <!-- Firebase SDK Compat Version -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
-    :root {
-      --primary-left: #3b82f6; --gradient-left: linear-gradient(135deg, #60a5fa, #2563eb);
-      --primary-right: #ef4444; --gradient-right: linear-gradient(135deg, #f87171, #dc2626);
-    }
-    body { font-family: 'Poppins', sans-serif; background: #0f172a; margin: 0; padding: 0; height: 100vh; overflow: hidden; user-select: none; color: #1e293b; }
     
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #0f172a; height: 100vh; overflow: hidden; user-select: none; color: #1e293b; }
+    
+    /* MENU ROOM */
     #main-menu { position: absolute; top:0; left:0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 50; background: rgba(15, 23, 42, 0.95); flex-direction: column;}
     .menu-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); text-align: center; width: 85%; max-width: 400px; color: white;}
-    .menu-title { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .menu-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
     .input-room { width: 80%; padding: 12px; border-radius: 12px; border: 2px solid #3b82f6; font-size: 18px; text-align: center; font-weight: 800; margin: 15px 0; outline: none; }
     .team-select { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
     .btn-team { flex: 1; padding: 10px; border: 2px solid transparent; border-radius: 10px; cursor: pointer; font-weight: 800; color: white; opacity: 0.5; }
     .btn-team.active { opacity: 1; border-color: white; transform: scale(1.05); }
-    .team-naruto { background: var(--gradient-left); }
-    .team-sasuke { background: var(--gradient-right); }
+    .team-naruto { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+    .team-sasuke { background: linear-gradient(135deg, #f87171, #dc2626); }
     .btn-main { width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; color: white; cursor: pointer; background: #10b981; }
     
+    /* GAME CONTAINER */
     #game-container { display: none; flex-direction: column; height: 100vh; background: #f1f5f9; }
     .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .room-info { font-weight: 800; color: #475569; font-size: 14px; }
-    .timer { font-size: 20px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 5px 12px; border-radius: 10px; border: 1px solid #fca5a5; }
+    .timer { font-size: 18px; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 5px 12px; border-radius: 10px; border: 1px solid #fca5a5; }
 
-    .arena-wrapper { padding: 20px; position: relative; display: flex; justify-content: center; }
-    .arena { width: 100%; height: 70px; background: #e2e8f0; border-radius: 35px; position: relative; display: flex; align-items: center; border: 2px solid white; overflow: visible; }
+    /* ARENA */
+    .arena-wrapper { padding: 30px 20px; position: relative; display: flex; justify-content: center; width: 100%; }
+    .arena { width: 100%; height: 50px; background: #cbd5e1; border-radius: 25px; position: relative; display: flex; align-items: center; border: 2px solid white; }
     .garis-tengah { position: absolute; width: 6px; height: 100%; background: #10b981; left: 50%; transform: translateX(-50%); z-index: 1; }
-    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.3s ease-out; z-index: 2; width: 220px; justify-content: space-between; }
+    
+    #karakter-grup { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; transition: left 0.2s ease-out; z-index: 2; width: 180px; justify-content: space-between; }
     .tali { position: absolute; width: 100%; height: 8px; background: #d97706; top: 50%; transform: translateY(-50%); z-index: -1; }
-    .simpul { width: 20px; height: 25px; background: #f59e0b; border-radius: 5px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
-    .karakter-img { width: 50px; height: 50px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .simpul { width: 16px; height: 22px; background: #f59e0b; border-radius: 4px; border: 2px solid #78350f; position: absolute; left: 50%; transform: translateX(-50%); }
+    .karakter-img { width: 45px; height: 45px; object-fit: contain; background: white; border-radius: 50%; padding: 2px; box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
     .char-kanan { transform: scaleX(-1); }
 
+    /* SOAL & KONTROL */
     .soal-container { padding: 10px 20px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    .soal-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 90%; max-width: 500px; border-top: 5px solid #8b5cf6; }
-    .soal-teks { font-size: 18px; font-weight: 800; color: #1e293b; margin: 0; }
+    .soal-box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; border-top: 5px solid #8b5cf6; }
+    .soal-teks { font-size: 16px; font-weight: 800; color: #1e293b; margin: 0; }
 
-    .kontrol-pemain { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 500px; margin: 0 auto; width: 90%; }
-    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 14px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-    .btn-naruto-theme { background: var(--gradient-left); }
-    .btn-sasuke-theme { background: var(--gradient-right); }
+    .kontrol-pemain { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 500px; margin: 0 auto; width: 100%; }
+    .btn-opsi { border: none; border-radius: 12px; cursor: pointer; padding: 14px; color: white; font-family: 'Poppins'; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .btn-opsi:active { transform: scale(0.95); }
+    .btn-naruto-theme { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+    .btn-sasuke-theme { background: linear-gradient(135deg, #f87171, #dc2626); }
 
+    /* OVERLAY HASIL */
     .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; color: white; }
     .win-box { background: white; color: #1e293b; padding: 30px; border-radius: 20px; text-align: center; width: 80%; max-width: 350px; }
   </style>
 </head>
 <body>
 
-  <!-- MAIN MENU -->
+  <!-- MENU AWAL -->
   <div id="main-menu">
     <div class="menu-card">
       <h1 class="menu-title">🌐 Mabar Online<br>Tarik Tambang</h1>
-      <p style="color: #94a3b8; font-size: 12px;">Masukkan Kode Room 4 Angka:</p>
+      <p style="color: #94a3b8; font-size: 12px;">Masukkan Kode Room Samamu:</p>
       
-      <input type="number" id="room-code" class="input-room" placeholder="Contoh: 1234">
+      <input type="number" id="room-code" class="input-room" placeholder="Misal: 1234">
       
       <div class="team-select">
         <button id="btn-team-1" class="btn-team team-naruto active" onclick="pilihTim(1)">🌀 Naruto</button>
@@ -73,7 +79,7 @@
     </div>
   </div>
 
-  <!-- GAME ARENA -->
+  <!-- ARENA GAME -->
   <div id="game-container">
     <div class="header">
       <div class="room-info">ROOM: <span id="label-room">1234</span> | TIM: <span id="label-tim">Naruto</span></div>
@@ -94,11 +100,11 @@
 
     <div class="soal-container">
       <div class="soal-box">
-        <p id="teks-soal" class="soal-teks">Memuat soal...</p>
+        <p id="teks-soal" class="soal-teks">Memuat Soal...</p>
       </div>
     </div>
 
-    <div class="kontrol-pemain" id="panel-tombol">
+    <div class="kontrol-pemain">
       <button class="btn-opsi" onclick="jawab(0)"><span id="opsi0">A</span></button>
       <button class="btn-opsi" onclick="jawab(1)"><span id="opsi1">B</span></button>
       <button class="btn-opsi" onclick="jawab(2)"><span id="opsi2">C</span></button>
@@ -106,16 +112,16 @@
     </div>
   </div>
 
-  <!-- OVERLAY MENANG -->
+  <!-- OVERLAY SELESAI -->
   <div id="overlay-menang" class="overlay">
     <div class="win-box">
-      <h2 id="teks-menang" style="font-size: 24px; margin: 0 0 10px 0;">Pemenang!</h2>
+      <h2 id="teks-menang" style="font-size: 20px; margin-bottom: 15px;">Pemenang!</h2>
       <button class="btn-main" onclick="window.location.reload()">🏠 Main Lagi</button>
     </div>
   </div>
 
   <script>
-    // KONFIGURASI FIREBASE REALTIME DATABASE
+    // 1. FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
       authDomain: "tarik-tambang-all-in.firebaseapp.com",
@@ -128,7 +134,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // BANK SOAL LANGSUNG
+    // 2. BANK SOAL
     const bankSoal = [
       { soal: "Berapakah hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], jawaban: 2 },
       { soal: "Ibu kota negara Indonesia saat ini adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 },
@@ -140,7 +146,7 @@
     let roomID = "";
     let timSaya = 1;
     let roomRef = null;
-    let indeksSoal = 0;
+    let indeksSoalSaya = 0;
 
     function pilihTim(t) {
       timSaya = t;
@@ -163,7 +169,17 @@
       const btns = document.querySelectorAll('.btn-opsi');
       btns.forEach(b => b.className = `btn-opsi ${timSaya === 1 ? 'btn-naruto-theme' : 'btn-sasuke-theme'}`);
 
+      tampilkanSoalLokal();
       inisiatisasiRoom();
+    }
+
+    function tampilkanSoalLokal() {
+      let sCur = bankSoal[indeksSoalSaya];
+      document.getElementById('teks-soal').innerText = sCur.soal;
+      document.getElementById('opsi0').innerText = "A. " + sCur.opsi[0];
+      document.getElementById('opsi1').innerText = "B. " + sCur.opsi[1];
+      document.getElementById('opsi2').innerText = "C. " + sCur.opsi[2];
+      document.getElementById('opsi3').innerText = "D. " + sCur.opsi[3];
     }
 
     function inisiatisasiRoom() {
@@ -171,10 +187,7 @@
         if (!snapshot.exists()) {
           roomRef.set({
             posisi: 50,
-            waktu: 600,
-            indeksSoal: 0,
-            skorKiri: 0,
-            skorKanan: 0
+            waktu: 600
           });
         }
         dengarkanServer();
@@ -186,48 +199,37 @@
         const data = snapshot.val();
         if (!data) return;
 
+        // Gerakkan tali realtime
         document.getElementById('karakter-grup').style.left = data.posisi + "%";
 
+        // Tampilkan timer
         let m = Math.floor(data.waktu / 60); let s = data.waktu % 60;
         document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
 
-        indeksSoal = data.indeksSoal;
-        let sCur = bankSoal[indeksSoal];
-        if (sCur) {
-          document.getElementById('teks-soal').innerText = sCur.soal;
-          document.getElementById('opsi0').innerText = "A. " + sCur.opsi[0];
-          document.getElementById('opsi1').innerText = "B. " + sCur.opsi[1];
-          document.getElementById('opsi2').innerText = "C. " + sCur.opsi[2];
-          document.getElementById('opsi3').innerText = "D. " + sCur.opsi[3];
-        }
-
-        if (data.posisi <= 10) akhiriGame("🏆 TIM NARUTO MENANG!");
-        else if (data.posisi >= 90) akhiriGame("🏆 TIM SASUKE MENANG!");
+        // Cek kondisi menang
+        if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
+        else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
       });
-
-      setInterval(() => {
-        roomRef.child('waktu').transaction((w) => (w > 0 ? w - 1 : 0));
-      }, 1000);
     }
 
     function jawab(indexPilihan) {
-      let sCur = bankSoal[indeksSoal];
+      let sCur = bankSoal[indeksSoalSaya];
       let isBenar = (indexPilihan === sCur.jawaban);
       let power = 5;
 
-      roomRef.transaction((data) => {
-        if (data) {
-          if (isBenar) {
-            if (timSaya === 1) data.posisi -= power;
-            if (timSaya === 2) data.posisi += power;
-          } else {
-            if (timSaya === 1) data.posisi += power;
-            if (timSaya === 2) data.posisi -= power;
-          }
-          data.indeksSoal = (data.indeksSoal + 1) % bankSoal.length;
+      // Update posisi tali ke server
+      roomRef.child('posisi').transaction((posSekarang) => {
+        if (posSekarang === null) return 50;
+        if (isBenar) {
+          return timSaya === 1 ? posSekarang - power : posSekarang + power;
+        } else {
+          return timSaya === 1 ? posSekarang + power : posSekarang - power;
         }
-        return data;
       });
+
+      // Lanjut ke soal berikutnya secara mandiri di HP ini
+      indeksSoalSaya = (indeksSoalSaya + 1) % bankSoal.length;
+      tampilkanSoalLokal();
     }
 
     function akhiriGame(pesan) {
