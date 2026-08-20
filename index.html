@@ -5,300 +5,301 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Tarik Tambang Arena HD - Live Edition</title>
   
+  <!-- Firebase JS SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
+  <!-- Tailwind CSS & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Titan+One&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Fredoka:wght@600;700&display=swap');
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
-    html, body { width: 100%; height: 100dvh; overflow: hidden; font-family: 'Fredoka', sans-serif; background: #0f172a; }
-    
-    /* EMOJI CANVAS MELAYANG */
-    #emoji-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
-    .floating-emoji { position: absolute; bottom: -50px; font-size: 36px; animation: floatUp 2.5s linear forwards; }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.8); opacity: 1; }
-      100% { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background: #090d16;
+    }
+    .font-titan {
+      font-family: 'Titan One', cursive;
     }
 
-    /* MENU LOBBY PRO */
-    #main-menu { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); padding: 20px; }
-    .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 25px 20px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-    .game-logo { font-family: 'Titan One', cursive; font-size: 22px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 12px; }
-    .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 12px; }
+    /* Floating Emoji Canvas */
+    #emoji-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .floating-emoji {
+      position: absolute;
+      bottom: -60px;
+      font-size: 40px;
+      animation: floatUp 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-115vh) scale(1.3) rotate(20deg); opacity: 0; }
+    }
+
+    /* Modern Glassmorphism & UI Accents */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
     
-    .role-select { display: flex; gap: 8px; margin-bottom: 12px; background: #0f172a; padding: 4px; border-radius: 12px; }
-    .btn-role { flex: 1; padding: 8px; border-radius: 10px; border: none; font-weight: 700; font-size: 12px; color: #94a3b8; background: transparent; cursor: pointer; }
-    .btn-role.active { background: #6366f1; color: white; }
+    .glass-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-btn:active {
+      transform: scale(0.96);
+    }
 
-    .team-select { display: flex; gap: 10px; margin-bottom: 15px; }
-    .btn-team { flex: 1; padding: 12px; border-radius: 14px; border: 3px solid transparent; font-family: 'Titan One', cursive; font-size: 14px; color: #fff; cursor: pointer; opacity: 0.5; transition: 0.2s; }
-    .btn-team.active { opacity: 1; border-color: #fff; transform: scale(1.05); }
-    .team-1 { background: linear-gradient(180deg, #3b82f6, #1d4ed8); box-shadow: 0 4px 0 #1e40af; }
-    .team-2 { background: linear-gradient(180deg, #ef4444, #b91c1c); box-shadow: 0 4px 0 #991b1b; }
-    
-    .btn-play { width: 100%; padding: 14px; border: none; border-radius: 16px; background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; font-family: 'Titan One', cursive; font-size: 16px; text-shadow: 1px 2px 0 #000; box-shadow: 0 5px 0 #166534; cursor: pointer; margin-bottom: 10px; }
-    .btn-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #166534; }
-    
-    .lobby-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    
-    .btn-guide-trigger { width: 100%; background: #0284c7; border: 2px solid #38bdf8; color: #ffffff; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 3px 0 #0369a1; }
-    .btn-guide-trigger:active { transform: translateY(2px); box-shadow: 0 1px 0 #0369a1; }
-
-    /* MODAL CARA MAIN */
-    .modal-guide { position: fixed; inset: 0; z-index: 400; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; padding: 20px; }
-    .guide-card { background: #1e293b; border: 3px solid #38bdf8; border-radius: 24px; padding: 20px; width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto; color: white; text-align: left; }
-    .guide-title { font-family: 'Titan One', cursive; color: #38bdf8; font-size: 18px; text-align: center; margin-bottom: 12px; }
-    .guide-section { background: #0f172a; border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 1px solid #334155; font-size: 12px; }
-    .guide-section h4 { color: #fbbf24; margin-bottom: 5px; font-size: 13px; display: flex; align-items: center; gap: 5px; }
-    .guide-section ul { padding-left: 18px; }
-    .guide-section li { margin-bottom: 4px; line-height: 1.4; }
-
-    /* EDITOR BANK SOAL */
-    .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
-    .modal-header { background: #3b82f6; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
-    .modal-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
-    .modal-body { flex: 1; padding: 15px; overflow-y: auto; background: #0f172a; }
-    .editor-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-    .btn-tool { padding: 10px 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; color: white; cursor: pointer; }
-    .btn-blue { background: #3b82f6; } .btn-orange { background: #f59e0b; color: #000; } .btn-red { background: #ef4444; } .btn-green { background: #10b981; margin-left: auto; }
-    .soal-item-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; margin-bottom: 10px; color: white; }
-    .soal-item-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #fbbf24; font-weight: 700; }
-    .input-edit { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 12px; margin-bottom: 6px; }
-    .grid-opsi { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-
-    /* GAME ARENA MAIN */
-    #game-container { display: none; flex-direction: column; width: 100vw; height: 100dvh; background: linear-gradient(180deg, #0284c7 0%, #0f172a 100%); justify-content: space-between; padding: max(10px, env(safe-area-inset-top)) 12px max(15px, env(safe-area-inset-bottom)) 12px; }
-
-    .top-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); padding: 8px 12px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); gap: 6px; }
-    .room-badge { font-weight: 700; color: #93c5fd; font-size: 12px; }
-    .timer-badge { font-family: 'Titan One', cursive; color: #f87171; background: #450a0a; padding: 4px 10px; border-radius: 12px; border: 2px solid #ef4444; font-size: 13px; }
-    .btn-exit-game { background: #dc2626; border: 1px solid #f87171; color: white; border-radius: 10px; padding: 5px 10px; font-weight: 700; font-size: 11px; cursor: pointer; }
-
-    /* STADIUM ARENA & ANIMASI TINJU */
-    .stadium { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border: 4px solid #fbbf24; border-radius: 24px; height: 120px; position: relative; display: flex; align-items: center; overflow: hidden; box-shadow: inset 0 6px 12px rgba(0,0,0,0.4); margin: 8px 0; }
-    .center-line { position: absolute; left: 50%; width: 6px; height: 100%; background: #ffffff; transform: translateX(-50%); opacity: 0.8; border-right: 2px dashed #000; z-index: 1; }
-    
-    #rope-group { position: absolute; left: 50%; width: 220px; height: 100%; display: flex; align-items: center; justify-content: space-between; transform: translateX(-50%); transition: left 0.3s ease-out; z-index: 2; }
-    .rope { position: absolute; width: 100%; height: 8px; background: #d97706; border: 2px solid #78350f; border-radius: 4px; top: 50%; transform: translateY(-50%); z-index: -1; }
-    .ribbon { position: absolute; left: 50%; width: 14px; height: 26px; background: #ef4444; border: 2px solid #fff; border-radius: 4px; transform: translateX(-50%); z-index: 3; }
-
-    .avatar-box { width: 55px; height: 55px; background: #fff; border-radius: 50%; border: 3px solid #fbbf24; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; transition: transform 0.1s ease; }
-    .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-    .char-flip { transform: scaleX(-1); }
-
-    /* EFEK LEKUKAN EFEC & IMPACT TINJU */
-    .punch-hit { position: absolute; font-size: 30px; z-index: 10; pointer-events: none; animation: hitPop 0.4s ease-out forwards; }
+    /* Punch Hit Effect */
+    .punch-hit {
+      position: absolute;
+      font-size: 36px;
+      z-index: 20;
+      pointer-events: none;
+      animation: hitPop 0.4s ease-out forwards;
+    }
     @keyframes hitPop {
-      0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
-      50% { transform: scale(1.5) rotate(10deg); opacity: 1; }
+      0% { transform: scale(0.2) rotate(-25deg); opacity: 0; }
+      50% { transform: scale(1.6) rotate(15deg); opacity: 1; }
       100% { transform: scale(1) rotate(0deg); opacity: 0; }
     }
 
+    /* Character Punching Animations */
     .anim-punch-naruto { animation: punchRight 0.3s ease-in-out; }
     @keyframes punchRight {
       0% { transform: translateX(0); }
-      50% { transform: translateX(40px) scale(1.2); }
+      50% { transform: translateX(35px) scale(1.15); }
       100% { transform: translateX(0); }
     }
 
     .anim-punch-sasuke { animation: punchLeft 0.3s ease-in-out; }
     @keyframes punchLeft {
       0% { transform: translateX(0); }
-      50% { transform: translateX(-40px) scale(1.2); }
+      50% { transform: translateX(-35px) scale(1.15); }
       100% { transform: translateX(0); }
     }
 
+    /* Stadium Shake */
     .stadium-shake { animation: shakeArena 0.3s ease-in-out; }
     @keyframes shakeArena {
       0%, 100% { transform: translate(0, 0); }
-      20% { transform: translate(-8px, 5px); }
-      40% { transform: translate(8px, -5px); }
-      60% { transform: translate(-5px, -5px); }
-      80% { transform: translate(5px, 5px); }
+      20% { transform: translate(-6px, 4px); }
+      40% { transform: translate(6px, -4px); }
+      60% { transform: translate(-4px, -4px); }
+      80% { transform: translate(4px, 4px); }
     }
 
-    /* SPECTATOR BOARD */
-    #spectator-panel { display: none; background: #1e293b; border: 2px solid #fbbf24; border-radius: 18px; padding: 12px; text-align: center; color: white; margin-bottom: 8px; flex: 1; flex-direction: column; justify-content: center; align-items: center; gap: 8px; }
-    .spectator-title { font-family: 'Titan One', cursive; color: #fbbf24; font-size: 16px; }
-    .stat-box { font-size: 14px; font-weight: 700; background: #0f172a; padding: 6px 15px; border-radius: 10px; border: 1px solid #475569; width: 100%; max-width: 260px; }
-    
-    .reaction-bar { display: flex; gap: 8px; margin-top: 4px; }
-    .btn-react { background: #334155; border: 1px solid #64748b; font-size: 20px; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.1s; }
-    .btn-react:active { transform: scale(1.2); }
-
-    #combo-badge { display: none; background: #f59e0b; color: #000; font-family: 'Titan One', cursive; font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
-
-    /* QUESTION CARD */
-    .question-card { background: rgba(30, 41, 59, 0.95); border: 2px solid #6366f1; border-radius: 18px; padding: 12px; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-bottom: 8px; }
-    .question-text { color: #ffffff; font-size: 14px; font-weight: 700; line-height: 1.3; }
-
-    /* 4 OPTION BUTTONS */
-    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 160px; }
-    .btn-ans { border: none; border-radius: 16px; padding: 10px; font-family: 'Fredoka', sans-serif; font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; text-align: left; cursor: pointer; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
-    .btn-ans:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
-    .badge-letter { font-family: 'Titan One', cursive; background: rgba(0,0,0,0.25); width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-    
-    .ans-naruto { background: linear-gradient(180deg, #3b82f6, #1d4ed8); border: 2px solid #60a5fa; box-shadow: 0 4px 0 #1e3a8a; }
-    .ans-sasuke { background: linear-gradient(180deg, #ef4444, #dc2626); border: 2px solid #f87171; box-shadow: 0 4px 0 #7f1d1d; }
-
-    /* OVERLAY HASIL */
-    .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 200; display: none; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
-    .win-card { background: #1e293b; border: 4px solid #fbbf24; border-radius: 28px; padding: 25px 20px; text-align: center; width: 100%; max-width: 320px; }
-    .win-title { font-family: 'Titan One', cursive; font-size: 20px; color: #fbbf24; margin-bottom: 15px; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
   </style>
 </head>
-<body>
+<body class="h-dvh w-screen overflow-hidden text-white">
 
   <!-- EMOJI CANVAS -->
   <div id="emoji-canvas"></div>
 
   <!-- LOBBY MAIN MENU -->
-  <div id="main-menu">
-    <div class="lobby-card">
-      <div class="game-logo">⚔️ TARIK TAMBANG ARENA ⚔️</div>
-      <input type="number" id="room-code" class="input-room" placeholder="KODE ROOM (cth: 8888)">
+  <div id="main-menu" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-indigo-950 via-slate-900 to-black">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border border-amber-500/30">
       
-      <div class="role-select">
-        <button id="btn-role-player" class="btn-role active" onclick="pilihRole('player')">🎮 PEMAIN</button>
-        <button id="btn-role-juri" class="btn-role" onclick="pilihRole('juri')">👀 JURI / PENONTON</button>
+      <div class="font-titan text-2xl tracking-wide text-amber-400 drop-shadow-[0_2px_10px_rgba(245,158,11,0.5)] mb-4 flex items-center justify-center gap-2">
+        <span>⚔️</span> TARIK TAMBANG <span>⚔️</span>
       </div>
 
-      <div id="team-select-box" class="team-select">
-        <button id="btn-t1" class="btn-team team-1 active" onclick="pilihTim(1)">NARUTO</button>
-        <button id="btn-t2" class="btn-team team-2" onclick="pilihTim(2)">SASUKE</button>
-      </div>
-
-      <button class="btn-play" onclick="gabungRoom()">MASUK ROOM 🚀</button>
+      <input type="number" id="room-code" placeholder="KODE ROOM (cth: 8888)" class="w-full py-3 px-4 rounded-xl bg-slate-900/80 border-2 border-indigo-500/80 text-white font-bold text-center text-lg outline-none focus:border-amber-400 transition-colors mb-3 placeholder-slate-500 shadow-inner">
       
-      <div class="lobby-action-grid">
-        <button class="btn-editor-trigger" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
-        <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Soal</button>
+      <!-- Role Selection -->
+      <div class="flex gap-2 p-1.5 bg-slate-900/90 rounded-xl mb-3 border border-slate-700/50">
+        <button id="btn-role-player" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md" onclick="pilihRole('player')">🎮 PEMAIN</button>
+        <button id="btn-role-juri" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white" onclick="pilihRole('juri')">👀 JURI / PENONTON</button>
       </div>
 
-      <button class="btn-guide-trigger" onclick="bukaModalCaraMain()">📖 Cara Main</button>
+      <!-- Team Selection -->
+      <div id="team-select-box" class="grid grid-cols-2 gap-3 mb-4">
+        <button id="btn-t1" class="py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 border-2 border-white scale-105" onclick="pilihTim(1)">NARUTO</button>
+        <button id="btn-t2" class="py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 opacity-50 hover:opacity-100 border-2 border-transparent" onclick="pilihTim(2)">SASUKE</button>
+      </div>
+
+      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-lg shadow-lg shadow-green-500/30 hover:brightness-110 glass-btn mb-3" onclick="gabungRoom()">MASUK ROOM 🚀</button>
+      
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <button class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
+        <button class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="bukaEditorSoal()">⚙️ Bank Soal</button>
+      </div>
+
+      <!-- SPECIAL RESET ROOM BUTTON (LOBBY) -->
+      <button class="w-full py-2.5 mb-2 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-500/50 text-red-400 hover:text-red-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors glass-btn shadow-md" onclick="specialResetRoomLobby()">
+        💥 Special Reset Room
+      </button>
+
+      <button class="w-full py-2.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors" onclick="bukaModalCaraMain()">📖 Panduan Bermain</button>
     </div>
   </div>
 
   <!-- MODAL CARA MAIN -->
-  <div id="modal-guide" class="modal-guide">
-    <div class="guide-card">
-      <div class="guide-title">📖 CARA BERMAIN</div>
+  <div id="modal-guide" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card border-sky-500/40 rounded-3xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto text-left shadow-2xl">
+      <div class="font-titan text-sky-400 text-lg text-center mb-4 flex items-center justify-center gap-2">
+        <span>📖</span> CARA BERMAIN
+      </div>
       
-      <div class="guide-section">
-        <h4>🎯 Tujuan Utama Game</h4>
-        <p>Tarik tali tambang ke arah tim kamu sampai batas maksimal (15% / 85%) atau unggul saat timer 10 menit habis!</p>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">🎯 Tujuan Utama Game</h4>
+        <p class="text-slate-300 leading-relaxed">Tarik tali tambang ke arah tim kamu hingga batas (15% / 85%) atau unggul saat timer habis!</p>
       </div>
 
-      <div class="guide-section">
-        <h4>🎮 Panduan Pemain (Siswa)</h4>
-        <ul>
-          <li>Pilih <strong>🎮 PEMAIN</strong> lalu pilih tim (<strong>NARUTO</strong> atau <strong>SASUKE</strong>).</li>
-          <li>Jawab kuis di HP secepat dan setepat mungkin.</li>
-          <li><strong>Jawaban BENAR:</strong> Menyerang/meninju lawan & menarik tali (+5%).</li>
-          <li><strong>Jawaban SALAH:</strong> Tali ditarik mundur ke arah lawan (-3%).</li>
-          <li><strong>🔥 Mode Combo 2X:</strong> Jawab BENAR 2x berturut-turut untuk kekuatan ganda (+10%)!</li>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1.5 flex items-center gap-1.5">🎮 Panduan Pemain</h4>
+        <ul class="list-disc list-inside space-y-1 text-slate-300">
+          <li>Pilih <strong>PEMAIN</strong> lalu tentukan tim favorit.</li>
+          <li>Jawab soal secepat & setepat mungkin.</li>
+          <li><span class="text-emerald-400 font-semibold">Jawaban BENAR:</span> Menyerang lawan (+5%).</li>
+          <li><span class="text-red-400 font-semibold">Jawaban SALAH:</span> Ditarik mundur (-3%).</li>
+          <li><span class="text-amber-400 font-semibold">🔥 Combo 2X:</span> Jawab benar 2x berturut-turut untuk kekuatan ganda (+10%)!</li>
         </ul>
       </div>
 
-      <div class="guide-section">
-        <h4>👀 Panduan Juri / Host (Guru)</h4>
-        <ul>
-          <li>Pilih <strong>👀 JURI / PENONTON</strong> lalu bagikan layar (Share Screen) di Zoom/Meet.</li>
-          <li>Gunakan tombol emoji di bawah layar untuk memberikan sorakan live!</li>
-        </ul>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-4 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">👀 Panduan Juri / Host</h4>
+        <p class="text-slate-300 leading-relaxed">Pilih mode JURI untuk menampilkan papan skor arena secara live di layar utama / Zoom / Meet.</p>
       </div>
 
-      <button class="btn-play" style="margin-top: 10px; padding: 10px; font-size: 14px;" onclick="tutupModalCaraMain()">PAHAM & TUTUP 🚀</button>
+      <button class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-sm shadow-md glass-btn" onclick="tutupModalCaraMain()">PAHAM & TUTUP 🚀</button>
     </div>
   </div>
 
   <!-- MODAL EDITOR BANK SOAL -->
-  <div id="modal-editor" class="modal-editor">
-    <div class="modal-header">
-      <div>⚙️ Editor Bank Soal</div>
-      <button class="modal-close" onclick="tutupEditorSoal()">✖</button>
+  <div id="modal-editor" class="fixed inset-0 z-50 bg-slate-950/95 hidden flex-col">
+    <div class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
+      <div class="font-bold text-lg text-indigo-400 flex items-center gap-2">⚙️ Bank Soal Editor</div>
+      <button class="text-slate-400 hover:text-white text-2xl font-bold" onclick="tutupEditorSoal()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="editor-toolbar">
-        <button class="btn-tool btn-blue" onclick="tambahBarisSoal()">+ Tambah Soal</button>
-        <label class="btn-tool btn-orange" style="cursor:pointer;">
+    
+    <div class="flex-1 p-4 overflow-y-auto bg-slate-950">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold transition-colors" onclick="tambahBarisSoal()">+ Tambah Soal</button>
+        <label class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold cursor-pointer transition-colors">
           📁 Import CSV
-          <input type="file" id="input-csv" accept=".csv" style="display:none;" onchange="bacaFileCSV(event)">
+          <input type="file" id="input-csv" accept=".csv" class="hidden" onchange="bacaFileCSV(event)">
         </label>
-        <button class="btn-tool btn-red" onclick="resetSemuaSoal()">🗑 Reset</button>
-        <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan Ke Database</button>
+        <button class="px-4 py-2 rounded-xl bg-red-600/80 hover:bg-red-600 text-xs font-bold transition-colors" onclick="resetSemuaSoal()">🗑 Reset All</button>
+        <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold transition-colors ml-auto shadow-md shadow-emerald-600/20" onclick="simpanKeDatabase()">💾 Simpan Database</button>
       </div>
-      <div id="list-soal-container"></div>
+      
+      <div id="list-soal-container" class="space-y-3"></div>
     </div>
   </div>
 
   <!-- GAME ARENA MAIN -->
-  <div id="game-container">
-    <div class="top-bar">
-      <div class="room-badge">
-        R: <span id="lbl-room" style="color:#fff;">-</span> | 
-        <span id="lbl-tim" style="color:#60a5fa;">NARUTO</span>
-        <span id="combo-badge">🔥 2X COMBO!</span>
+  <div id="game-container" class="hidden flex-col h-dvh w-screen bg-gradient-to-b from-sky-900 via-slate-900 to-slate-950 justify-between p-3 select-none">
+    
+    <!-- Top Bar -->
+    <div class="glass-card rounded-2xl p-2.5 px-4 flex justify-between items-center border border-white/10 shadow-lg">
+      <div class="text-xs font-bold text-sky-200 flex items-center gap-2">
+        <span>Room: <strong id="lbl-room" class="text-white">-</strong></span>
+        <span class="text-slate-500">|</span>
+        <span id="lbl-tim" class="text-blue-400">NARUTO</span>
+        <span id="combo-badge" class="hidden bg-amber-500 text-slate-950 font-titan text-[10px] px-2 py-0.5 rounded-full animate-bounce">🔥 2X COMBO!</span>
       </div>
-      <div id="waktu" class="timer-badge">10:00</div>
-      <button class="btn-exit-game" onclick="keluarGame()">🚪 Keluar</button>
+      <div id="waktu" class="font-titan text-red-400 bg-red-950/80 border border-red-500/50 px-3 py-1 rounded-xl text-sm tracking-wider shadow-inner">10:00</div>
+      <button class="bg-red-600/80 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-xs font-bold glass-btn" onclick="keluarGame()">Exit</button>
     </div>
 
-    <!-- STADIUM ARENA -->
-    <div id="arena-stadium" class="stadium">
-      <div class="center-line"></div>
-      <div id="rope-group">
-        <div id="avatar-naruto" class="avatar-box"><img src="https://img.icons8.com/color/144/naruto.png" alt="Naruto"></div>
-        <div class="rope"></div>
-        <div class="ribbon"></div>
-        <div id="avatar-sasuke" class="avatar-box"><img src="https://img.icons8.com/color/144/sasuke-uchiha.png" class="char-flip" alt="Sasuke"></div>
-      </div>
-    </div>
-
-    <!-- TAMPILAN JURI / PENONTON -->
-    <div id="spectator-panel">
-      <div class="spectator-title">📺 MODE JURI / LIVE SPECTATOR</div>
-      <div class="stat-box">POSISI TALI: <span id="lbl-posisi-tali" style="color:#fbbf24;">50%</span></div>
-      <div class="stat-box">STATUS: <span id="lbl-status-unggul" style="color:#60a5fa;">SEIMBANG</span></div>
+    <!-- Stadium Arena -->
+    <div id="arena-stadium" class="relative my-2 h-32 rounded-2xl bg-gradient-to-b from-emerald-700 to-green-900 border-4 border-amber-400 flex items-center overflow-hidden shadow-[inset_0_4px_12px_rgba(0,0,0,0.6)]">
+      <div class="absolute left-1/2 -translate-x-1/2 w-1.5 h-full bg-white/80 border-r-2 border-dashed border-black/50 z-10"></div>
       
-      <div style="font-size:11px; color:#94a3b8; margin-top:2px;">KIRIM EMOJI LIVE:</div>
-      <div class="reaction-bar">
-        <button class="btn-react" onclick="kirimReaksi('👏')">👏</button>
-        <button class="btn-react" onclick="kirimReaksi('🔥')">🔥</button>
-        <button class="btn-react" onclick="kirimReaksi('🎉')">🎉</button>
-        <button class="btn-react" onclick="kirimReaksi('💣')">💣</button>
+      <div id="rope-group" class="absolute left-1/2 -translate-x-1/2 w-64 h-full flex items-center justify-between transition-all duration-300 ease-out z-20">
+        <!-- Naruto Avatar -->
+        <div id="avatar-naruto" class="w-14 h-14 rounded-full border-2 border-amber-400 bg-slate-900 overflow-hidden shadow-md relative transition-transform">
+          <img src="https://img.icons8.com/color/144/naruto.png" alt="Naruto" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Rope & Ribbon -->
+        <div class="relative flex-1 h-2 bg-amber-700 border border-amber-950 rounded-full mx-1">
+          <div class="absolute left-1/2 -top-2.5 -translate-x-1/2 w-3.5 h-7 bg-red-500 border-2 border-white rounded-sm shadow-md"></div>
+        </div>
+
+        <!-- Sasuke Avatar -->
+        <div id="avatar-sasuke" class="w-14 h-14 rounded-full border-2 border-amber-400 bg-slate-900 overflow-hidden shadow-md relative transition-transform">
+          <img src="https://img.icons8.com/color/144/sasuke-uchiha.png" alt="Sasuke" class="w-full h-full object-cover -scale-x-100">
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Spectator / Juri Panel -->
+    <div id="spectator-panel" class="hidden flex-1 glass-card border-amber-400/40 rounded-2xl p-4 flex-col justify-center items-center text-center gap-3 my-2">
+      <div class="font-titan text-amber-400 text-lg">📺 SPECTATOR ARENA</div>
+      <div class="w-full max-w-xs space-y-2">
+        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 text-sm font-bold">POSISI TALI: <span id="lbl-posisi-tali" class="text-amber-400">50%</span></div>
+        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 text-sm font-bold">STATUS: <span id="lbl-status-unggul" class="text-sky-400">SEIMBANG</span></div>
+      </div>
+      
+      <div class="text-xs text-slate-400 mt-2">KIRIM REAKSI LIVE:</div>
+      <div class="flex gap-2">
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('👏')">👏</button>
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('🔥')">🔥</button>
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('🎉')">🎉</button>
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('💣')">💣</button>
       </div>
 
-      <button class="btn-play" style="margin-top:8px; padding:8px; font-size:12px; max-width:200px;" onclick="resetMatchTali()">🔄 Reset Pertandingan</button>
+      <div class="flex gap-2 mt-2 w-full max-w-xs">
+        <button class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-titan text-xs shadow-md glass-btn" onclick="resetMatchTali()">🔄 Reset Tali</button>
+        <button class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-titan text-xs shadow-md glass-btn" onclick="specialResetRoomInGame()">💥 Special Reset</button>
+      </div>
     </div>
 
-    <!-- KOTAK SOAL -->
-    <div id="card-soal-box" class="question-card">
-      <p id="teks-soal" class="question-text">Memuat Pertanyaan...</p>
+    <!-- Question Card -->
+    <div id="card-soal-box" class="glass-card rounded-2xl p-4 text-center my-2 flex-1 flex items-center justify-center border-indigo-500/30 shadow-xl">
+      <p id="teks-soal" class="text-white text-base md:text-lg font-bold leading-relaxed">Memuat Pertanyaan...</p>
     </div>
 
-    <!-- TOMBOL JAWABAN -->
-    <div id="grid-jawaban-box" class="answers-grid">
-      <button class="btn-ans ans-naruto" onclick="jawab(0)"><span class="badge-letter">A</span><span id="opt0">-</span></button>
-      <button class="btn-ans ans-naruto" onclick="jawab(1)"><span class="badge-letter">B</span><span id="opt1">-</span></button>
-      <button class="btn-ans ans-naruto" onclick="jawab(2)"><span class="badge-letter">C</span><span id="opt2">-</span></button>
-      <button class="btn-ans ans-naruto" onclick="jawab(3)"><span class="badge-letter">D</span><span id="opt3">-</span></button>
+    <!-- Answer Options Grid -->
+    <div id="grid-jawaban-box" class="grid grid-cols-2 gap-2.5 h-40">
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(0)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">A</span>
+        <span id="opt0" class="line-clamp-2">-</span>
+      </button>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(1)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">B</span>
+        <span id="opt1" class="line-clamp-2">-</span>
+      </button>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(2)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">C</span>
+        <span id="opt2" class="line-clamp-2">-</span>
+      </button>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(3)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">D</span>
+        <span id="opt3" class="line-clamp-2">-</span>
+      </button>
     </div>
   </div>
 
   <!-- OVERLAY HASIL -->
-  <div id="overlay-menang" class="overlay">
-    <div class="win-card">
-      <div id="teks-menang" class="win-title">TIM NARUTO MENANG!</div>
-      <button class="btn-play" onclick="keluarGame()">KEMBALI KE LOBBY 🏠</button>
+  <div id="overlay-menang" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card border-amber-400/50 rounded-3xl p-6 text-center w-full max-w-xs shadow-2xl">
+      <div id="teks-menang" class="font-titan text-xl text-amber-400 mb-6 drop-shadow-md">TIM NARUTO MENANG!</div>
+      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-sm shadow-lg glass-btn" onclick="keluarGame()">KEMBALI KE LOBBY 🏠</button>
     </div>
   </div>
 
   <script>
-    /* WEB AUDIO SYNTHESIZER (DENGAN EFEK SUARA PUNCH/TINJU) */
+    /* Web Audio Synthesizer */
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playSFX(type) {
@@ -308,38 +309,41 @@
       osc.connect(gain);
       gain.connect(audioCtx.destination);
 
+      const now = audioCtx.currentTime;
+
       if (type === 'correct' || type === 'punch') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(); osc.stop(now + 0.15);
       } else if (type === 'wrong') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(); osc.stop(now + 0.2);
       } else if (type === 'cheer') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(); osc.stop(now + 0.15);
       } else if (type === 'win') {
         osc.type = 'square';
-        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15);
-        osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.15);
+        osc.frequency.setValueAtTime(783.99, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start(); osc.stop(now + 0.6);
       }
     }
 
+    /* Firebase Config */
     const firebaseConfig = {
       apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
       authDomain: "tarik-tambang-all-in.firebaseapp.com",
@@ -352,6 +356,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    /* Global State */
     let bankSoal = [];
     let roomID = "";
     let timSaya = 1;
@@ -361,14 +366,23 @@
     let timerInterval = null;
     let comboCount = 0;
 
-    function bukaModalCaraMain() { document.getElementById('modal-guide').style.display = 'flex'; }
-    function tutupModalCaraMain() { document.getElementById('modal-guide').style.display = 'none'; }
+    function bukaModalCaraMain() { document.getElementById('modal-guide').classList.remove('hidden'); document.getElementById('modal-guide').classList.add('flex'); }
+    function tutupModalCaraMain() { document.getElementById('modal-guide').classList.add('hidden'); document.getElementById('modal-guide').classList.remove('flex'); }
 
     function pilihRole(role) {
       roleSaya = role;
-      document.getElementById('btn-role-player').classList.toggle('active', role === 'player');
-      document.getElementById('btn-role-juri').classList.toggle('active', role === 'juri');
-      document.getElementById('team-select-box').style.display = (role === 'player') ? 'flex' : 'none';
+      const btnPlayer = document.getElementById('btn-role-player');
+      const btnJuri = document.getElementById('btn-role-juri');
+      
+      if (role === 'player') {
+        btnPlayer.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
+        btnJuri.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
+        document.getElementById('team-select-box').style.display = 'grid';
+      } else {
+        btnJuri.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
+        btnPlayer.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
+        document.getElementById('team-select-box').style.display = 'none';
+      }
     }
 
     function toggleFullScreen() {
@@ -376,6 +390,36 @@
         document.documentElement.requestFullscreen().catch(() => {});
       } else {
         document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    /* SPECIAL RESET ROOM FUNCTIONS */
+    function specialResetRoomLobby() {
+      const code = document.getElementById('room-code').value.trim();
+      if (!code || code.length < 3) {
+        alert("Masukkan kode room yang ingin di-reset (minimal 3 digit)!");
+        return;
+      }
+      if (confirm(`💥 Apakah Anda yakin ingin MENGHAPUS SEMUA DATA room "${code}"?\nSemua skor dan progres room akan di-reset total dari awal.`)) {
+        const targetRoomRef = db.ref('rooms/room_' + code);
+        targetRoomRef.remove()
+          .then(() => {
+            alert(`✅ Room "${code}" berhasil di-reset total! Silakan gunakan room tersebut kembali.`);
+          })
+          .catch((err) => {
+            alert("Gagal mereset room: " + err.message);
+          });
+      }
+    }
+
+    function specialResetRoomInGame() {
+      if (!roomRef) return;
+      const code = document.getElementById('lbl-room').innerText;
+      if (confirm(`💥 Reset total room "${code}" sekarang?\nTali akan kembali ke 50% dan timer di-reset ke 10 menit!`)) {
+        roomRef.set({ posisi: 50, waktu: 600, reaction: '', punch: '' })
+          .then(() => {
+            alert("✅ Room berhasil di-reset total!");
+          });
       }
     }
 
@@ -388,29 +432,35 @@
     }
     muatSoalDariFirebase();
 
-    function bukaEditorSoal() { document.getElementById('modal-editor').style.display = 'flex'; }
-    function tutupEditorSoal() { document.getElementById('modal-editor').style.display = 'none'; }
+    function bukaEditorSoal() { document.getElementById('modal-editor').classList.remove('hidden'); document.getElementById('modal-editor').classList.add('flex'); }
+    function tutupEditorSoal() { document.getElementById('modal-editor').classList.add('hidden'); document.getElementById('modal-editor').classList.remove('flex'); }
 
     function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
       container.innerHTML = '';
       if (bankSoal.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:30px; font-size:14px;">Belum ada soal. Klik "+ Tambah Soal" atau "Import CSV".</div>';
+        container.innerHTML = '<div class="text-slate-500 text-center py-12 text-xs">Belum ada soal. Klik "+ Tambah Soal" atau "Import CSV".</div>';
         return;
       }
       bankSoal.forEach((s, idx) => {
         const card = document.createElement('div');
-        card.className = 'soal-item-card';
+        card.className = 'bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs space-y-2';
         card.innerHTML = `
-          <div class="soal-item-header"><span>SOAL #${idx + 1}</span><span style="color:#ef4444; cursor:pointer;" onclick="hapusSoal(${idx})">🗑 Hapus</span></div>
-          <input type="text" class="input-edit" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Pertanyaan...">
-          <div class="grid-opsi">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="A">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="B">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="C">
-            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="D">
+          <div class="flex justify-between font-bold text-amber-400">
+            <span>SOAL #${idx + 1}</span>
+            <span class="text-red-400 cursor-pointer hover:underline" onclick="hapusSoal(${idx})">🗑 Hapus</span>
           </div>
-          <input type="number" class="input-edit" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" placeholder="Kunci (0=A, 1=B, 2=C, 3=D)" min="0" max="3">
+          <input type="text" class="w-full p-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-medium focus:border-indigo-500 outline-none" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Pertanyaan...">
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="Pilihan A">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="Pilihan B">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="Pilihan C">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="Pilihan D">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 text-[10px]">Kunci Jawaban (0=A, 1=B, 2=C, 3=D):</span>
+            <input type="number" class="w-16 p-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-center font-bold focus:border-indigo-500 outline-none" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" min="0" max="3">
+          </div>
         `;
         container.appendChild(card);
       });
@@ -418,7 +468,7 @@
 
     function tambahBarisSoal() { bankSoal.push({ soal: "", opsi: ["", "", "", ""], jawaban: 0 }); renderFormEditor(); }
     function hapusSoal(idx) { bankSoal.splice(idx, 1); renderFormEditor(); }
-    function resetSemuaSoal() { if (confirm("Hapus semua soal?")) { bankSoal = []; db.ref('bankSoal').remove().then(() => renderFormEditor()); } }
+    function resetSemuaSoal() { if (confirm("Hapus seluruh soal?")) { bankSoal = []; db.ref('bankSoal').remove().then(() => renderFormEditor()); } }
     function updateDataSoal(idx, key, val) { bankSoal[idx][key] = val; }
     function updateDataOpsi(idx, opsiIdx, val) { if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["","","",""]; bankSoal[idx].opsi[opsiIdx] = val; }
 
@@ -445,7 +495,7 @@
         if (hasilSoal.length > 0) {
           bankSoal = hasilSoal;
           renderFormEditor();
-          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari CSV!`);
+          alert(`✅ Berhasil import ${hasilSoal.length} soal!`);
         } else {
           alert("Format CSV tidak valid!");
         }
@@ -454,44 +504,55 @@
     }
 
     function simpanKeDatabase() {
-      db.ref('bankSoal').set(bankSoal).then(() => { alert("✅ Bank Soal Disimpan!"); tutupEditorSoal(); });
+      db.ref('bankSoal').set(bankSoal).then(() => { alert("✅ Database diperbarui!"); tutupEditorSoal(); });
     }
 
     function pilihTim(t) {
       timSaya = t;
-      document.getElementById('btn-t1').classList.toggle('active', t === 1);
-      document.getElementById('btn-t2').classList.toggle('active', t === 2);
+      const b1 = document.getElementById('btn-t1');
+      const b2 = document.getElementById('btn-t2');
+      if (t === 1) {
+        b1.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 border-2 border-white scale-105 opacity-100";
+        b2.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 opacity-50 border-2 border-transparent hover:opacity-100";
+      } else {
+        b2.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 shadow-lg shadow-red-500/30 border-2 border-white scale-105 opacity-100";
+        b1.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 opacity-50 border-2 border-transparent hover:opacity-100";
+      }
     }
 
     function gabungRoom() {
       const code = document.getElementById('room-code').value.trim();
-      if (!code || code.length < 3) { alert("Masukkan kode room minimal 3 angka!"); return; }
+      if (!code || code.length < 3) { alert("Masukkan kode room minimal 3 digit!"); return; }
       
       roomID = "room_" + code;
       roomRef = db.ref('rooms/' + roomID);
 
-      document.getElementById('main-menu').style.display = 'none';
-      document.getElementById('overlay-menang').style.display = 'none';
-      document.getElementById('game-container').style.display = 'flex';
+      document.getElementById('main-menu').classList.add('hidden');
+      document.getElementById('overlay-menang').classList.add('hidden');
+      document.getElementById('game-container').classList.remove('hidden');
+      document.getElementById('game-container').classList.add('flex');
       document.getElementById('lbl-room').innerText = code;
       
       const lblTim = document.getElementById('lbl-tim');
+      const btns = document.querySelectorAll('.btn-ans');
       
       if (roleSaya === 'juri') {
-        lblTim.innerText = "JURI / SPECTATOR";
-        lblTim.style.color = "#fbbf24";
-        document.getElementById('spectator-panel').style.display = 'flex';
-        document.getElementById('card-soal-box').style.display = 'none';
-        document.getElementById('grid-jawaban-box').style.display = 'none';
+        lblTim.innerText = "SPECTATOR";
+        lblTim.className = "text-amber-400 font-bold";
+        document.getElementById('spectator-panel').classList.remove('hidden');
+        document.getElementById('spectator-panel').classList.add('flex');
+        document.getElementById('card-soal-box').classList.add('hidden');
+        document.getElementById('grid-jawaban-box').classList.add('hidden');
       } else {
         lblTim.innerText = timSaya === 1 ? "NARUTO" : "SASUKE";
-        lblTim.style.color = timSaya === 1 ? "#60a5fa" : "#f87171";
-        document.getElementById('spectator-panel').style.display = 'none';
-        document.getElementById('card-soal-box').style.display = 'flex';
-        document.getElementById('grid-jawaban-box').style.display = 'grid';
+        lblTim.className = timSaya === 1 ? "text-blue-400 font-bold" : "text-red-400 font-bold";
+        document.getElementById('spectator-panel').classList.add('hidden');
+        document.getElementById('card-soal-box').classList.remove('hidden');
+        document.getElementById('grid-jawaban-box').classList.remove('hidden');
 
-        const btns = document.querySelectorAll('.btn-ans');
-        btns.forEach(b => b.className = `btn-ans ${timSaya === 1 ? 'ans-naruto' : 'ans-sasuke'}`);
+        btns.forEach(b => {
+          b.className = `btn-ans glass-btn ${timSaya === 1 ? 'bg-gradient-to-b from-blue-600 to-blue-800 border-blue-400/50' : 'bg-gradient-to-b from-red-600 to-red-800 border-red-400/50'} border-2 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg`;
+        });
 
         comboCount = 0;
         updateComboBadge();
@@ -512,7 +573,6 @@
       });
     }
 
-    /* ANIMASI MENINJU NARUTO VS SASUKE */
     function jalankanAnimasiTinju(penyerang) {
       playSFX('punch');
       const arena = document.getElementById('arena-stadium');
@@ -520,26 +580,28 @@
       const avatarSasuke = document.getElementById('avatar-sasuke');
 
       arena.classList.remove('stadium-shake');
-      void arena.offsetWidth; // Trigger reflow
+      void arena.offsetWidth;
       arena.classList.add('stadium-shake');
 
       const hitBox = document.createElement('div');
       hitBox.className = 'punch-hit';
       hitBox.innerText = '💥';
 
-      if (penyerang === 1) { // Naruto meninju Sasuke
+      if (penyerang === 1) {
         avatarNaruto.classList.remove('anim-punch-naruto');
         void avatarNaruto.offsetWidth;
         avatarNaruto.classList.add('anim-punch-naruto');
 
-        hitBox.style.right = '10px';
+        hitBox.style.right = '-10px';
+        hitBox.style.top = '0px';
         avatarSasuke.appendChild(hitBox);
-      } else { // Sasuke meninju Naruto
+      } else {
         avatarSasuke.classList.remove('anim-punch-sasuke');
         void avatarSasuke.offsetWidth;
         avatarSasuke.classList.add('anim-punch-sasuke');
 
-        hitBox.style.left = '10px';
+        hitBox.style.left = '-10px';
+        hitBox.style.top = '0px';
         avatarNaruto.appendChild(hitBox);
       }
 
@@ -563,11 +625,11 @@
         }
 
         if (roleSaya === 'juri') {
-          document.getElementById('lbl-posisi-tali').innerText = data.posisi + "%";
+          document.getElementById('lbl-posisi-tali').innerText = Math.round(data.posisi) + "%";
           const statusLbl = document.getElementById('lbl-status-unggul');
-          if (data.posisi < 50) { statusLbl.innerText = "NARUTO UNGGUL"; statusLbl.style.color = "#60a5fa"; }
-          else if (data.posisi > 50) { statusLbl.innerText = "SASUKE UNGGUL"; statusLbl.style.color = "#f87171"; }
-          else { statusLbl.innerText = "SEIMBANG"; statusLbl.style.color = "#fbbf24"; }
+          if (data.posisi < 50) { statusLbl.innerText = "NARUTO UNGGUL"; statusLbl.className = "text-blue-400 font-bold"; }
+          else if (data.posisi > 50) { statusLbl.innerText = "SASUKE UNGGUL"; statusLbl.className = "text-red-400 font-bold"; }
+          else { statusLbl.innerText = "SEIMBANG"; statusLbl.className = "text-amber-400 font-bold"; }
         }
 
         if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
@@ -576,9 +638,7 @@
     }
 
     function kirimReaksi(emoji) {
-      if (roomRef) {
-        roomRef.child('reaction').set(emoji + "_" + Date.now());
-      }
+      if (roomRef) roomRef.child('reaction').set(emoji + "_" + Date.now());
     }
 
     function tampilkanFloatingEmoji(strData) {
@@ -589,7 +649,7 @@
       el.style.left = (10 + Math.random() * 80) + "vw";
       document.getElementById('emoji-canvas').appendChild(el);
       playSFX('cheer');
-      setTimeout(() => el.remove(), 2500);
+      setTimeout(() => el.remove(), 2200);
     }
 
     function resetMatchTali() {
@@ -618,9 +678,9 @@
     function keluarGame() {
       if (roomRef) { roomRef.off(); roomRef = null; }
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-      document.getElementById('game-container').style.display = 'none';
-      document.getElementById('overlay-menang').style.display = 'none';
-      document.getElementById('main-menu').style.display = 'flex';
+      document.getElementById('game-container').classList.add('hidden');
+      document.getElementById('overlay-menang').classList.add('hidden');
+      document.getElementById('main-menu').classList.remove('hidden');
     }
 
     function tampilkanSoal() {
@@ -639,10 +699,10 @@
     function updateComboBadge() {
       const badge = document.getElementById('combo-badge');
       if (comboCount >= 2) {
-        badge.innerText = `🔥 ${comboCount}X COMBO (2X POWER)!`;
-        badge.style.display = 'inline-block';
+        badge.innerText = `🔥 ${comboCount}X COMBO!`;
+        badge.classList.remove('hidden');
       } else {
-        badge.style.display = 'none';
+        badge.classList.add('hidden');
       }
     }
 
@@ -655,7 +715,6 @@
       if (isBenar) {
         comboCount++;
         if (comboCount >= 2) basePower *= 2;
-        // Kirim event tinju ke server Firebase agar layar penonton/juri ikut memicu animasi
         roomRef.child('punch').set(timSaya + "_" + Date.now());
       } else {
         playSFX('wrong');
@@ -681,7 +740,8 @@
       if (timerInterval) clearInterval(timerInterval);
       playSFX('win');
       document.getElementById('teks-menang').innerText = pesan;
-      document.getElementById('overlay-menang').style.display = "flex";
+      document.getElementById('overlay-menang').classList.remove('hidden');
+      document.getElementById('overlay-menang').classList.add('flex');
     }
   </script>
 </body>
