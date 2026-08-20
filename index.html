@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Tarik Tambang Pro + Upload Soal</title>
+  <title>Tarik Tambang Arena HD + Editor Soal CSV</title>
   
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -15,12 +15,12 @@
     html, body { width: 100%; height: 100dvh; overflow: hidden; font-family: 'Fredoka', sans-serif; background: #0f172a; }
     
     /* MENU LOBBY PRO */
-    #main-menu { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); padding: 20px; overflow-y: auto; }
-    .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 22px 18px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
-    .game-logo { font-family: 'Titan One', cursive; font-size: 22px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 12px; }
-    .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 12px; }
+    #main-menu { position: fixed; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1b4b 0%, #0f172a 100%); padding: 20px; }
+    .lobby-card { background: rgba(30, 41, 59, 0.95); border: 3px solid #fbbf24; border-radius: 28px; padding: 25px 20px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+    .game-logo { font-family: 'Titan One', cursive; font-size: 24px; color: #f59e0b; text-shadow: 2px 2px 0px #78350f, -2px -2px 0 #000; margin-bottom: 15px; }
+    .input-room { width: 100%; padding: 12px; border-radius: 14px; border: 3px solid #6366f1; font-size: 18px; text-align: center; font-weight: 700; background: #1e293b; color: #fff; outline: none; margin-bottom: 15px; }
     .team-select { display: flex; gap: 10px; margin-bottom: 15px; }
-    .btn-team { flex: 1; padding: 10px; border-radius: 14px; border: 3px solid transparent; font-family: 'Titan One', cursive; font-size: 13px; color: #fff; cursor: pointer; opacity: 0.5; transition: 0.2s; }
+    .btn-team { flex: 1; padding: 12px; border-radius: 14px; border: 3px solid transparent; font-family: 'Titan One', cursive; font-size: 14px; color: #fff; cursor: pointer; opacity: 0.5; transition: 0.2s; }
     .btn-team.active { opacity: 1; border-color: #fff; transform: scale(1.05); }
     .team-1 { background: linear-gradient(180deg, #3b82f6, #1d4ed8); box-shadow: 0 4px 0 #1e40af; }
     .team-2 { background: linear-gradient(180deg, #ef4444, #b91c1c); box-shadow: 0 4px 0 #991b1b; }
@@ -28,13 +28,24 @@
     .btn-play { width: 100%; padding: 14px; border: none; border-radius: 16px; background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; font-family: 'Titan One', cursive; font-size: 16px; text-shadow: 1px 2px 0 #000; box-shadow: 0 5px 0 #166534; cursor: pointer; margin-bottom: 10px; }
     .btn-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #166534; }
     
-    .btn-admin-toggle { background: transparent; border: none; color: #94a3b8; font-size: 12px; text-decoration: underline; cursor: pointer; margin-top: 5px; }
+    .btn-editor-trigger { background: #334155; border: 2px solid #64748b; color: #f1f5f9; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-    /* PANEL UPLOAD / TAMBAH SOAL OTOMATIS */
-    #admin-panel { display: none; margin-top: 15px; border-top: 2px dashed rgba(255,255,255,0.15); padding-top: 15px; text-align: left; }
-    .admin-title { font-size: 13px; color: #fbbf24; font-weight: 700; margin-bottom: 8px; text-align: center; }
-    .input-admin { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #475569; font-size: 12px; background: #0f172a; color: #fff; margin-bottom: 6px; outline: none; }
-    .btn-upload { width: 100%; padding: 10px; border: none; border-radius: 10px; background: #3b82f6; color: white; font-weight: 700; font-size: 12px; cursor: pointer; }
+    /* MODAL EDITOR BANK SOAL (SERUPA SCREENSHOT BOSQ) */
+    .modal-editor { position: fixed; inset: 0; z-index: 300; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; }
+    .modal-header { background: #3b82f6; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+    .modal-body { flex: 1; padding: 15px; overflow-y: auto; background: #0f172a; }
+    
+    .editor-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .btn-tool { padding: 10px 15px; border-radius: 10px; border: none; font-weight: 700; font-size: 13px; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-blue { background: #3b82f6; }
+    .btn-orange { background: #f59e0b; border: 2px solid #000; color: #000; }
+    .btn-green { background: #10b981; margin-left: auto; }
+
+    .soal-item-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; margin-bottom: 10px; color: white; }
+    .soal-item-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #fbbf24; font-weight: 700; }
+    .input-edit { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 12px; margin-bottom: 6px; }
+    .grid-opsi { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
     /* LAYOUT GAME MOBILE ARENA */
     #game-container { display: none; flex-direction: column; width: 100vw; height: 100dvh; background: linear-gradient(180deg, #0284c7 0%, #0f172a 100%); justify-content: space-between; padding: max(10px, env(safe-area-inset-top)) 12px max(15px, env(safe-area-inset-bottom)) 12px; }
@@ -90,19 +101,31 @@
 
       <button class="btn-play" onclick="gabungRoom()">MAIN SEKARANG 🚀</button>
       
-      <button class="btn-admin-toggle" onclick="toggleAdminPanel()">⚙️ Menu Upload Soal Otomatis</button>
+      <!-- TOMBOL BUKA EDITOR BANK SOAL -->
+      <button class="btn-editor-trigger" onclick="bukaEditorSoal()">⚙️ Editor Bank Soal</button>
+    </div>
+  </div>
 
-      <!-- PANEL UPLOAD SOAL KE DATABASE -->
-      <div id="admin-panel">
-        <div class="admin-title">Tambah Soal ke Database</div>
-        <input type="text" id="in-soal" class="input-admin" placeholder="Pertanyaan...">
-        <input type="text" id="in-o0" class="input-admin" placeholder="Opsi A">
-        <input type="text" id="in-o1" class="input-admin" placeholder="Opsi B">
-        <input type="text" id="in-o2" class="input-admin" placeholder="Opsi C">
-        <input type="text" id="in-o3" class="input-admin" placeholder="Opsi D">
-        <input type="number" id="in-benar" class="input-admin" placeholder="Jawaban Benar (0=A, 1=B, 2=C, 3=D)">
-        <button class="btn-upload" onclick="uploadSoalBaru()">📤 Upload Soal ke Cloud</button>
+  <!-- MODAL EDITOR BANK SOAL (SESUAI GAMBAR BARU) -->
+  <div id="modal-editor" class="modal-editor">
+    <div class="modal-header">
+      <div>⚙️ Editor Bank Soal</div>
+      <button class="modal-close" onclick="tutupEditorSoal()">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="editor-toolbar">
+        <button class="btn-tool btn-blue" onclick="tambahBarisSoal()">+ Tambah Soal (Max 20)</button>
+        
+        <label class="btn-tool btn-orange" style="cursor:pointer;">
+          📁 Upload File CSV
+          <input type="file" id="input-csv" accept=".csv" style="display:none;" onchange="bacaFileCSV(event)">
+        </label>
+
+        <button class="btn-tool btn-green" onclick="simpanKeDatabase()">💾 Simpan ke Database</button>
       </div>
+
+      <!-- LIST CONTAINER TEMPAT SOAL DIEDIT -->
+      <div id="list-soal-container"></div>
     </div>
   </div>
 
@@ -126,7 +149,7 @@
 
     <!-- KOTAK SOAL -->
     <div class="question-card">
-      <p id="teks-soal" class="question-text">Memuat Pertanyaan dari Server...</p>
+      <p id="teks-soal" class="question-text">Memuat Pertanyaan...</p>
     </div>
 
     <!-- TOMBOL JAWABAN HD -->
@@ -138,7 +161,7 @@
     </div>
   </div>
 
-  <!-- OVERLAY MENANG -->
+  <!-- OVERLAY HASIL -->
   <div id="overlay-menang" class="overlay">
     <div class="win-card">
       <div id="teks-menang" class="win-title">TIM NARUTO MENANG!</div>
@@ -159,62 +182,126 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let daftarSoal = [];
+    let bankSoal = [];
     let roomID = "";
     let timSaya = 1;
     let roomRef = null;
     let idxSoal = 0;
 
-    // Ambil soal otomatis dari Firebase saat halaman dibuka
-    function ambilSoalDariCloud() {
+    // Sinkronkan Soal dengan Firebase
+    function muatSoalDariFirebase() {
       db.ref('bankSoal').on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          daftarSoal = Object.values(data);
-          if (daftarSoal.length > 0 && document.getElementById('game-container').style.display === 'flex') {
-            tampilkanSoal();
-          }
+          bankSoal = Array.isArray(data) ? data : Object.values(data);
         } else {
-          // Fallback jika database masih kosong
-          daftarSoal = [
+          bankSoal = [
             { soal: "Berapakah hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], jawaban: 2 },
             { soal: "Ibu kota negara Indonesia saat ini adalah...", opsi: ["Jakarta", "Nusantara", "Bandung", "Surabaya"], jawaban: 1 }
           ];
         }
+        renderFormEditor();
       });
     }
-    ambilSoalDariCloud();
+    muatSoalDariFirebase();
 
-    function toggleAdminPanel() {
-      let panel = document.getElementById('admin-panel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    /* FITUR EDITOR & UPLOAD CSV */
+    function bukaEditorSoal() {
+      document.getElementById('modal-editor').style.display = 'flex';
+    }
+    function tutupEditorSoal() {
+      document.getElementById('modal-editor').style.display = 'none';
     }
 
-    function uploadSoalBaru() {
-      let s = document.getElementById('in-soal').value.trim();
-      let o0 = document.getElementById('in-o0').value.trim();
-      let o1 = document.getElementById('in-o1').value.trim();
-      let o2 = document.getElementById('in-o2').value.trim();
-      let o3 = document.getElementById('in-o3').value.trim();
-      let j = parseInt(document.getElementById('in-benar').value);
+    function renderFormEditor() {
+      const container = document.getElementById('list-soal-container');
+      container.innerHTML = '';
 
-      if(!s || !o0 || !o1 || isNaN(j)) {
-        alert("Mohon isi soal, minimal 2 opsi, dan nomor jawaban benar (0-3)!");
-        return;
-      }
-
-      let soalBaru = { soal: s, opsi: [o0, o1, o2, o3], jawaban: j };
-      db.ref('bankSoal').push(soalBaru).then(() => {
-        alert("✅ Soal berhasil di-upload otomatis ke server!");
-        document.getElementById('in-soal').value = '';
-        document.getElementById('in-o0').value = '';
-        document.getElementById('in-o1').value = '';
-        document.getElementById('in-o2').value = '';
-        document.getElementById('in-o3').value = '';
-        document.getElementById('in-benar').value = '';
+      bankSoal.forEach((s, idx) => {
+        const card = document.createElement('div');
+        card.className = 'soal-item-card';
+        card.innerHTML = `
+          <div class="soal-item-header">
+            <span>SOAL #${idx + 1}</span>
+            <span style="color:#ef4444; cursor:pointer;" onclick="hapusSoal(${idx})">🗑 Hapus</span>
+          </div>
+          <input type="text" class="input-edit" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Tulis Pertanyaan...">
+          <div class="grid-opsi">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="Opsi A">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="Opsi B">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="Opsi C">
+            <input type="text" class="input-edit" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="Opsi D">
+          </div>
+          <input type="number" class="input-edit" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" placeholder="Kunci Jawaban (0=A, 1=B, 2=C, 3=D)" min="0" max="3">
+        `;
+        container.appendChild(card);
       });
     }
 
+    function tambahBarisSoal() {
+      if (bankSoal.length >= 20) { alert("Maksimal 20 Soal!"); return; }
+      bankSoal.push({ soal: "", opsi: ["", "", "", ""], jawaban: 0 });
+      renderFormEditor();
+    }
+
+    function hapusSoal(idx) {
+      bankSoal.splice(idx, 1);
+      renderFormEditor();
+    }
+
+    function updateDataSoal(idx, key, val) {
+      bankSoal[idx][key] = val;
+    }
+
+    function updateDataOpsi(idx, opsiIdx, val) {
+      if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["", "", "", ""];
+      bankSoal[idx].opsi[opsiIdx] = val;
+    }
+
+    // UPLOAD FILE CSV AUTOMATIS
+    function bacaFileCSV(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const baris = text.split('\n');
+        let hasilSoal = [];
+
+        baris.forEach(row => {
+          if (row.trim() !== '') {
+            // Kolom CSV: Pertanyaan, OpsiA, OpsiB, OpsiC, OpsiD, Kunci(0-3)
+            const col = row.split(',');
+            if (col.length >= 6) {
+              hasilSoal.push({
+                soal: col[0].trim(),
+                opsi: [col[1].trim(), col[2].trim(), col[3].trim(), col[4].trim()],
+                jawaban: parseInt(col[5].trim()) || 0
+              });
+            }
+          }
+        });
+
+        if (hasilSoal.length > 0) {
+          bankSoal = hasilSoal;
+          renderFormEditor();
+          alert(`✅ Berhasil membaca ${hasilSoal.length} soal dari file CSV! Klik "Simpan ke Database" untuk memperbarui.`);
+        } else {
+          alert(" Format CSV tidak valid! Pastikan format per baris: Soal, OpsiA, OpsiB, OpsiC, OpsiD, KunciJawaban(0-3)");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function simpanKeDatabase() {
+      db.ref('bankSoal').set(bankSoal).then(() => {
+        alert("✅ Berhasil menyimpan seluruh Bank Soal ke Database Cloud!");
+        tutupEditorSoal();
+      });
+    }
+
+    /* SISTEM GAMEPLAY */
     function pilihTim(t) {
       timSaya = t;
       document.getElementById('btn-t1').classList.toggle('active', t === 1);
@@ -244,13 +331,13 @@
     }
 
     function tampilkanSoal() {
-      if (daftarSoal.length === 0) return;
-      let s = daftarSoal[idxSoal % daftarSoal.length];
+      if (bankSoal.length === 0) return;
+      let s = bankSoal[idxSoal % bankSoal.length];
       document.getElementById('teks-soal').innerText = s.soal;
-      document.getElementById('opt0').innerText = s.opsi[0] || "";
-      document.getElementById('opt1').innerText = s.opsi[1] || "";
-      document.getElementById('opt2').innerText = s.opsi[2] || "";
-      document.getElementById('opt3').innerText = s.opsi[3] || "";
+      document.getElementById('opt0').innerText = s.opsi ? s.opsi[0] : "";
+      document.getElementById('opt1').innerText = s.opsi ? s.opsi[1] : "";
+      document.getElementById('opt2').innerText = s.opsi ? s.opsi[2] : "";
+      document.getElementById('opt3').innerText = s.opsi ? s.opsi[3] : "";
     }
 
     function inisiatisasiRoom() {
@@ -278,8 +365,8 @@
     }
 
     function jawab(pilihan) {
-      if (daftarSoal.length === 0) return;
-      let s = daftarSoal[idxSoal % daftarSoal.length];
+      if (bankSoal.length === 0) return;
+      let s = bankSoal[idxSoal % bankSoal.length];
       let isBenar = (pilihan === s.jawaban);
       let power = 5;
 
@@ -288,7 +375,7 @@
         if (isBenar) {
           return timSaya === 1 ? posSekarang - power : posSekarang + power;
         } else {
-          return timSoy === 1 ? posSekarang + power : posSekarang - power;
+          return timSaya === 1 ? posSekarang + power : posSekarang - power;
         }
       });
 
