@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Battle Stickman Quiz Arena HD - Fatality Edition</title>
   
+  <!-- Firebase JS SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <!-- Tailwind CSS & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +33,7 @@
       font-family: 'Orbitron', sans-serif;
     }
 
-    /* Floating Emoji Overlay */
+    /* Floating Emoji Canvas Overlay */
     #emoji-canvas {
       position: fixed;
       inset: 0;
@@ -88,7 +92,7 @@
       box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.5);
     }
 
-    /* Modern Arena Canvas Background Pattern */
+    /* Modern Arena Grid Canvas Background Pattern */
     .arena-modern-bg {
       background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
       box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(99, 102, 241, 0.25);
@@ -172,9 +176,9 @@
       <div class="font-titan text-2xl tracking-wider text-amber-400 drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] mb-1 flex items-center justify-center gap-2">
         <span>⚔️</span> STICKMAN BATTLE <span>⚔️</span>
       </div>
-      <p class="text-[11px] text-cyan-400 font-bold mb-4 tracking-widest uppercase">Quiz Arena & Fatality Mabar HD</p>
+      <p class="text-[11px] text-cyan-400 font-bold mb-4 tracking-widest uppercase">Quiz Arena & Fatality Edition HD</p>
 
-      <input type="number" id="room-code" placeholder="KODE ROOM MABAR (cth: 8888)" class="w-full py-3 px-4 rounded-xl bg-slate-900/90 border-2 border-indigo-500/80 text-white font-orbitron font-bold text-center text-lg outline-none focus:border-amber-400 transition-colors mb-3 placeholder-slate-500 shadow-inner" value="8888">
+      <input type="number" id="room-code" placeholder="KODE ROOM (cth: 8888)" class="w-full py-3 px-4 rounded-xl bg-slate-900/90 border-2 border-indigo-500/80 text-white font-orbitron font-bold text-center text-lg outline-none focus:border-amber-400 transition-colors mb-3 placeholder-slate-500 shadow-inner">
       
       <!-- Role Selection -->
       <div class="flex gap-2 p-1.5 bg-slate-900/90 rounded-xl mb-3 border border-slate-700/60">
@@ -192,7 +196,7 @@
         </button>
       </div>
 
-      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-base shadow-lg shadow-green-500/30 hover:brightness-110 glass-btn mb-3 tracking-wide" onclick="gabungRoom()">MASUK ARENA MABAR 🚀</button>
+      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-base shadow-lg shadow-green-500/30 hover:brightness-110 glass-btn mb-3 tracking-wide" onclick="gabungRoom()">MULAI PERTARUNGAN 🚀</button>
       
       <div class="grid grid-cols-2 gap-2 mb-2">
         <button class="py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
@@ -201,7 +205,7 @@
 
       <!-- SPECIAL RESET ROOM BUTTON (LOBBY) -->
       <button class="w-full py-2.5 mb-2 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-500/50 text-red-400 hover:text-red-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors glass-btn shadow-md" onclick="specialResetRoomLobby()">
-        💥 Reset Total Room Mabar
+        💥 Reset Total Room
       </button>
 
       <button class="w-full py-2.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors" onclick="bukaModalCaraMain()">📖 Panduan Bermain</button>
@@ -330,7 +334,7 @@
       <div id="commentary-ticker-container" class="absolute top-3 inset-x-3 z-20 pointer-events-none flex justify-center">
         <div class="commentary-ticker-box px-4 py-2 rounded-2xl flex items-center gap-2.5 text-xs md:text-sm font-bold shadow-2xl backdrop-blur-md border border-amber-400/60 max-w-[95%]">
           <span class="text-amber-400 text-lg animate-bounce flex-shrink-0">🎙️</span>
-          <span id="commentary-ticker-text" class="text-amber-300 font-titan tracking-wide line-clamp-1 drop-shadow-md">KOMENTATOR ARENA: Pertarungan mabar dimulai! Bersiaplah para pejuang sejati!</span>
+          <span id="commentary-ticker-text" class="text-amber-300 font-titan tracking-wide line-clamp-1 drop-shadow-md">KOMENTATOR ARENA: Pertarungan sengit dimulai! Bersiaplah para pejuang sejati!</span>
         </div>
       </div>
 
@@ -418,49 +422,12 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // App ID & Firebase Config initialization
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'stickman-battle-quiz-app';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-      apiKey: "",
-      authDomain: "stickman-battle.firebaseapp.com",
-      projectId: "stickman-battle",
-      storageBucket: "stickman-battle.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let authUser = null;
-    async function initAuth() {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          const userCred = await signInWithCustomToken(auth, __initial_auth_token);
-          authUser = userCred.user;
-        } else {
-          const userCred = await signInAnonymously(auth);
-          authUser = userCred.user;
-        }
-      } catch (e) {
-        console.warn("Auth initialization fallback:", e);
-      }
-    }
-    initAuth();
-
-    // Firestore Path helper (STRICT RULE 1: /artifacts/{appId}/public/data/{collectionName}/{docId})
-    const getRoomRef = (code) => doc(db, 'artifacts', appId, 'public', 'data', 'stickman_rooms', code.toString());
-
-    // Canvas Setup
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
     const canvas = document.getElementById('stickman-canvas');
     const ctx = canvas.getContext('2d');
 
+    // Canvas Resize Handler
     function resizeCanvas() {
       const container = document.getElementById('arena-stadium');
       if (container && canvas) {
@@ -475,8 +442,8 @@
     let p2State = { hp: 100, animState: 'idle' };
     let timSaya = 1; // 1 = Blue Fighter, 2 = Red Fighter
     let roleSaya = 'player'; // 'player' or 'juri'
-    let roomID = '8888';
-    let unsubscribeRoom = null;
+    let roomID = '';
+    let roomRef = null;
     let timerInterval = null;
     let comboCount = 0;
     let maxComboCount = 0;
@@ -486,6 +453,7 @@
     let idxSoal = 0;
     let finishHimTriggered = false;
     let isFatalityActive = false;
+    let isAnsweringLocked = false; // Input Cooldown Lock Flag for Multiplayer
     let fatalityName = '';
     const fatalityNamesList = [
       '⚡ THUNDER GOD SLICE ⚡', 
@@ -498,9 +466,7 @@
     let bloodParticles = [];
     let slashEffects = [];
     let damageNumbers = [];
-    let lastProcessedHitTimestamp = 0;
-    let lastProcessedReactionTimestamp = 0;
-    let lastProcessedResetTimestamp = 0;
+    let lastHitTimestamp = 0;
     let customModalCallback = null;
 
     // Default Bank Soal
@@ -509,20 +475,71 @@
       { soal: "Apa ibu kota negara Indonesia?", opsi: ["Bandung", "Surabaya", "Jakarta", "Medan"], jawaban: 2 },
       { soal: "Unsur kimia dengan lambang 'O' adalah...", opsi: ["Emas", "Oksigen", "Osmium", "Perak"], jawaban: 1 },
       { soal: "Planet terbesar dalam tata surya kita adalah...", opsi: ["Mars", "Saturnus", "Jupiter", "Neptunus"], jawaban: 2 },
-      { soal: "Siapa penemu bola lampu pijar?", opsi: ["Nikola Tesla", "Thomas Edison", "Albert Einstein", "Alexander Graham Bell"], jawaban: 1 },
-      { soal: "Berapa jumlah provinsi di Indonesia saat ini?", opsi: ["34", "38", "36", "40"], jawaban: 1 },
-      { soal: "Mata uang negara Jepang adalah...", opsi: ["Yen", "Won", "Yuan", "Ringgit"], jawaban: 0 }
+      { soal: "Siapa penemu bola lampu pijar?", opsi: ["Nikola Tesla", "Thomas Edison", "Albert Einstein", "Alexander Graham Bell"], jawaban: 1 }
     ];
 
-    // Web Audio Synthesizer
+    // Database Setup with Fallback Local Storage
+    let db;
+    try {
+      if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+          firebase.initializeApp({
+            databaseURL: "https://stickman-quiz-default-rtdb.firebaseio.com"
+          });
+        }
+        db = firebase.database();
+      } else {
+        throw new Error("Firebase SDK missing");
+      }
+    } catch(e) {
+      // Local Database Mock Engine for Offline / Standalone Play
+      const localRooms = {};
+      db = {
+        ref: function(path) {
+          if (!localRooms[path]) {
+            localRooms[path] = {
+              data: { hp1: 100, hp2: 100, waktu: 600, reaction: '', hitEvent: null, isGameOver: false },
+              listeners: []
+            };
+          }
+          const roomObj = localRooms[path];
+          const notify = () => roomObj.listeners.forEach(cb => cb({ val: () => roomObj.data }));
+          return {
+            get: () => Promise.resolve({ exists: () => true, val: () => roomObj.data }),
+            set: (val) => { roomObj.data = val; notify(); return Promise.resolve(); },
+            update: (val) => { Object.assign(roomObj.data, val); notify(); return Promise.resolve(); },
+            remove: () => { roomObj.data = { hp1: 100, hp2: 100, waktu: 600, reaction: '', hitEvent: null, isGameOver: false }; notify(); return Promise.resolve(); },
+            on: (evt, cb) => { if (!roomObj.listeners.includes(cb)) roomObj.listeners.push(cb); cb({ val: () => roomObj.data }); },
+            off: () => { roomObj.listeners = []; },
+            child: (childPath) => {
+              return {
+                set: (val) => { roomObj.data[childPath] = val; notify(); return Promise.resolve(); },
+                transaction: (updateFn, onComplete) => {
+                  const currentVal = roomObj.data[childPath] !== undefined ? roomObj.data[childPath] : null;
+                  const newVal = updateFn(currentVal);
+                  roomObj.data[childPath] = newVal;
+                  const snap = { val: () => newVal };
+                  notify();
+                  if (onComplete) onComplete(null, true, snap);
+                }
+              };
+            }
+          };
+        }
+      };
+    }
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // BGM & Announcer States
     let isBGMEnabled = true;
     let isVoiceEnabled = true;
     let bgmInterval = null;
     let bgmStep = 0;
-    let bgmTempoMs = 220;
+    let bgmTempoMs = 220; // Normal tempo
     let lastCommentaryTime = 0;
 
+    // Web Audio SFX Synthesizer
     function playSFX(type) {
       try {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -572,10 +589,20 @@
           gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
           osc.start(now);
           osc.stop(now + 0.3);
+        } else if (type === 'win') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554, now + 0.1);
+          osc.frequency.setValueAtTime(659, now + 0.2);
+          gain.gain.setValueAtTime(0.6, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
         }
       } catch(e) {}
     }
 
+    // BGM Controls
     function startBGM() {
       if (!isBGMEnabled || bgmInterval) return;
       const notes = [110, 110, 130, 110, 146, 110, 130, 98];
@@ -604,7 +631,77 @@
       }
     }
 
-    // Web Speech Voice
+    function toggleBGM() {
+      isBGMEnabled = !isBGMEnabled;
+      const btnText = document.getElementById('txt-bgm-status');
+      if (isBGMEnabled) {
+        btnText.innerText = "Musik: ON";
+        startBGM();
+      } else {
+        btnText.innerText = "Musik: OFF";
+        stopBGM();
+      }
+    }
+
+    function toggleVoiceAnnouncer() {
+      isVoiceEnabled = !isVoiceEnabled;
+      const btnText = document.getElementById('txt-voice-status');
+      btnText.innerText = isVoiceEnabled ? "Suara: ON" : "Suara: OFF";
+    }
+
+    function spawnBlood(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        bloodParticles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.7) * 10,
+          radius: Math.random() * 4 + 2,
+          color: Math.random() > 0.3 ? '#dc2626' : '#991b1b',
+          life: 1.0
+        });
+      }
+    }
+
+    function spawnDamageText(x, y, text, isCrit, isUltimate, isFatality) {
+      damageNumbers.push({
+        x: x,
+        y: y,
+        vy: -2,
+        text: text,
+        isCrit: isCrit,
+        isUltimate: isUltimate,
+        isFatality: isFatality,
+        life: 1.0
+      });
+    }
+
+    function tampilkanCustomModal(title, body, icon = "⚠️", showCancel = false, onConfirm = null) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-body').innerText = body;
+      document.getElementById('modal-icon').innerText = icon;
+      
+      const btnCancel = document.getElementById('modal-btn-cancel');
+      if (showCancel) btnCancel.classList.remove('hidden');
+      else btnCancel.classList.add('hidden');
+
+      customModalCallback = onConfirm;
+      const modal = document.getElementById('custom-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function tutupCustomModal() {
+      const modal = document.getElementById('custom-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (customModalCallback) {
+        customModalCallback();
+        customModalCallback = null;
+      }
+    }
+
+    // Web Speech API Voice setup
     let idVoice = null;
     function loadVoices() {
       if ('speechSynthesis' in window) {
@@ -658,33 +755,6 @@
       }
     }
 
-    function spawnBlood(x, y, count) {
-      for (let i = 0; i < count; i++) {
-        bloodParticles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 12,
-          vy: (Math.random() - 0.7) * 10,
-          radius: Math.random() * 4 + 2,
-          color: Math.random() > 0.3 ? '#dc2626' : '#991b1b',
-          life: 1.0
-        });
-      }
-    }
-
-    function spawnDamageText(x, y, text, isCrit, isUltimate, isFatality) {
-      damageNumbers.push({
-        x: x,
-        y: y,
-        vy: -2,
-        text: text,
-        isCrit: isCrit,
-        isUltimate: isUltimate,
-        isFatality: isFatality,
-        life: 1.0
-      });
-    }
-
     function triggerStickmanAttack(attacker, damage, isCrit, isUltimate, isFatality = false) {
       const attackerName = attacker === 1 ? "Petarung Biru" : "Petarung Merah";
       const victimName = attacker === 1 ? "Petarung Merah" : "Petarung Biru";
@@ -709,13 +779,23 @@
         }, 2800);
       } else if (isUltimate) {
         playSFX('ultimate');
-        sampaikanKomentar(`DUARRR! Tembakan Laser Super Ultimet ${attackerName} meledakkan arena!`, true);
+        sampaikanKomentar(`GILA GAMEOVER BOSS! Tembakan Laser Super Ultimet ${attackerName} meledakkan arena!`, true);
       } else {
         playSFX(isCrit ? 'crit' : 'punch');
         if (isCrit) {
-          sampaikanKomentar(`SERANGAN KRITIS DAHSYAT! ${attackerName} menghantam telak ${victimName}!`);
+          const critPhrases = [
+            `DUARRR! Serangan kritis dahsyat dari ${attackerName} menghantam telak!`,
+            `Pukulan mematikan mendarat! Darah ${victimName} berkurang drastis!`,
+            `SERANGAN KRITIS KILAT! Pertahanan ${victimName} hancur berkeping-keping!`
+          ];
+          sampaikanKomentar(critPhrases[Math.floor(Math.random() * critPhrases.length)]);
         } else {
-          sampaikanKomentar(`Pukulan presisi dari ${attackerName} mengenai sasaran!`);
+          const hitPhrases = [
+            `Pukulan presisi dari ${attackerName}!`,
+            `${attackerName} melancarkan serangan cepat!`,
+            `Tembakan serangan ${attackerName} mengenai sasaran dengan tepat!`
+          ];
+          sampaikanKomentar(hitPhrases[Math.floor(Math.random() * hitPhrases.length)]);
         }
       }
 
@@ -748,66 +828,318 @@
       setTimeout(() => {
         if (p1State.hp > 0 && !isFatality) p1State.animState = 'idle';
         if (p2State.hp > 0 && !isFatality) p2State.animState = 'idle';
-      }, 700);
+      }, 450);
     }
 
-    // Stickman Canvas Renderer (60 FPS)
+    function triggerFinishHimBanner() {
+      if (finishHimTriggered) return;
+      finishHimTriggered = true;
+      playSFX('finish_him');
+      
+      bgmTempoMs = 140;
+      if (bgmInterval) { stopBGM(); startBGM(); }
+
+      sampaikanKomentar("HABISI DIA! Darah lawan sudah sangat kritis! Lakukan eksekusi akhir sekarang!", true);
+
+      const banner = document.getElementById('banner-finish-him');
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+
+      setTimeout(() => {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+      }, 1800);
+    }
+
+    function drawStickman(x, y, color, state, dir, streakCount = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      if (streakCount >= 3 && state.animState !== 'ko') {
+        const auraColor = streakCount >= 6 ? 'rgba(245, 158, 11, ' : 'rgba(6, 182, 212, ';
+        const pulse = Math.sin(Date.now() / 100) * 6 + 18;
+        ctx.beginPath();
+        ctx.arc(0, -45, pulse + 12, 0, Math.PI * 2);
+        ctx.fillStyle = auraColor + '0.25)';
+        ctx.fill();
+
+        ctx.strokeStyle = auraColor + '0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 14;
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (state.animState === 'ko') {
+        ctx.fillStyle = 'rgba(185, 28, 28, 0.8)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 50, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const headX = -35 * dir;
+        const headY = -12;
+        
+        ctx.beginPath();
+        ctx.arc(headX, headY, 12, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(headX - 4, headY - 4); ctx.lineTo(headX + 4, headY + 4);
+        ctx.moveTo(headX + 4, headY - 4); ctx.lineTo(headX - 4, headY + 4);
+        ctx.stroke();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(headX + (12 * dir), headY);
+        ctx.lineTo(15 * dir, headY);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(headX + (20 * dir), headY);
+        ctx.lineTo(headX + (10 * dir), headY - 10);
+        ctx.moveTo(headX + (20 * dir), headY);
+        ctx.lineTo(headX + (30 * dir), headY - 6);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(15 * dir, headY);
+        ctx.lineTo(35 * dir, headY);
+        ctx.moveTo(15 * dir, headY);
+        ctx.lineTo(40 * dir, headY - 8);
+        ctx.stroke();
+
+        ctx.font = "900 15px Titan One";
+        ctx.fillStyle = "#ef4444";
+        ctx.shadowColor = "#000000";
+        ctx.shadowBlur = 10;
+        ctx.textAlign = "center";
+        ctx.fillText("💀 DEFEATED / K.O.", 0, -35);
+        ctx.shadowBlur = 0;
+
+        ctx.restore();
+        return;
+      }
+
+      let headY = -70;
+      let bodyX = 0;
+      let rArmX = 16 * dir, rArmY = -42;
+      let lArmX = -16 * dir, lArmY = -42;
+      let rLegX = 16 * dir, rLegY = 0;
+      let lLegX = -16 * dir, lLegY = 0;
+
+      const bounce = Math.sin(Date.now() / 180) * 3;
+      headY += bounce;
+
+      if (state.animState === 'punch') {
+        rArmX = 42 * dir;
+        rArmY = -54;
+        bodyX = 14 * dir;
+      } else if (state.animState === 'ultimate') {
+        rArmX = 52 * dir;
+        rArmY = -48;
+        lArmX = 46 * dir;
+        lArmY = -40;
+        bodyX = 20 * dir;
+      } else if (state.animState === 'hurt') {
+        bodyX = -18 * dir;
+        headY = -62;
+        rArmX = -26 * dir;
+        lArmX = -32 * dir;
+      }
+
+      ctx.beginPath();
+      ctx.arc(bodyX, headY, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.arc(bodyX + (5 * dir), headY - 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 14;
+
+      ctx.beginPath();
+      ctx.moveTo(bodyX, headY + 14);
+      ctx.lineTo(bodyX, -25);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(bodyX, headY + 22);
+      ctx.lineTo(rArmX, rArmY);
+      ctx.moveTo(bodyX, headY + 22);
+      ctx.lineTo(lArmX, lArmY);
+      ctx.stroke();
+
+      if (state.animState === 'punch' || state.animState === 'ultimate') {
+        ctx.strokeStyle = streakCount >= 3 ? '#f59e0b' : '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(rArmX, rArmY);
+        ctx.lineTo(rArmX + (25 * dir), rArmY - 10);
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4.5;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(bodyX, -25);
+      ctx.lineTo(rLegX, rLegY);
+      ctx.moveTo(bodyX, -25);
+      ctx.lineTo(lLegX, lLegY);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
     function renderCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const groundY = canvas.height * 0.76;
 
-      // Draw Arena Floor Line & Glow
+      if (isFatalityActive) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.88)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const spotX = canvas.width / 2;
+        const grad = ctx.createRadialGradient(spotX, groundY - 40, 20, spotX, groundY - 40, 280);
+        grad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(spotX, groundY - 40, 280, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = isFatalityActive ? 'rgba(239, 68, 68, 0.6)' : 'rgba(99, 102, 241, 0.35)';
+      ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(0, groundY);
       ctx.lineTo(canvas.width, groundY);
-      ctx.strokeStyle = '#312e81';
-      ctx.lineWidth = 4;
       ctx.stroke();
 
+      ctx.strokeStyle = isFatalityActive ? 'rgba(255, 0, 0, 0.8)' : 'rgba(6, 182, 212, 0.5)';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(0, groundY + 2);
-      ctx.lineTo(canvas.width, groundY + 2);
-      ctx.strokeStyle = '#6366f1';
-      ctx.lineWidth = 1;
+      ctx.moveTo(0, groundY + 4);
+      ctx.lineTo(canvas.width, groundY + 4);
       ctx.stroke();
+
+      ctx.setLineDash([8, 8]);
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 0);
+      ctx.lineTo(canvas.width / 2, canvas.height);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
       const p1X = canvas.width * 0.3;
       const p2X = canvas.width * 0.7;
 
-      // Render Stickman 1 (Blue)
-      drawStickman(p1X, groundY, '#06b6d4', p1State.animState, 1);
-      
-      // Render Stickman 2 (Red)
-      drawStickman(p2X, groundY, '#f43f5e', p2State.animState, -1);
+      drawStickman(p1X, groundY, '#06b6d4', p1State, 1, timSaya === 1 ? comboCount : 0);
+      drawStickman(p2X, groundY, '#ef4444', p2State, -1, timSaya === 2 ? comboCount : 0);
 
-      // Render Blood Particles
+      if (p1State.animState === 'ko' && p2State.animState !== 'ko') {
+        ctx.save();
+        ctx.font = "900 16px Titan One";
+        ctx.fillStyle = "#f59e0b";
+        ctx.shadowColor = "#f59e0b";
+        ctx.shadowBlur = 12;
+        ctx.textAlign = "center";
+        ctx.fillText("👑 WINNER!", p2X, groundY - 100);
+        ctx.restore();
+      } else if (p2State.animState === 'ko' && p1State.animState !== 'ko') {
+        ctx.save();
+        ctx.font = "900 16px Titan One";
+        ctx.fillStyle = "#f59e0b";
+        ctx.shadowColor = "#f59e0b";
+        ctx.shadowBlur = 12;
+        ctx.textAlign = "center";
+        ctx.fillText("👑 WINNER!", p1X, groundY - 100);
+        ctx.restore();
+      }
+
+      for (let i = laserEffects.length - 1; i >= 0; i--) {
+        let l = laserEffects[i];
+        l.life -= 0.05;
+        ctx.save();
+        ctx.fillStyle = `rgba(245, 158, 11, ${Math.max(0, l.life * 0.6)})`;
+        ctx.fillRect(0, l.y - 40, canvas.width, 80);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, l.life)})`;
+        ctx.lineWidth = 14;
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.moveTo(0, l.y);
+        ctx.lineTo(canvas.width, l.y);
+        ctx.stroke();
+        ctx.restore();
+        if (l.life <= 0) laserEffects.splice(i, 1);
+      }
+
       for (let i = bloodParticles.length - 1; i >= 0; i--) {
-        const p = bloodParticles[i];
+        let p = bloodParticles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.4;
+        p.vy += 0.45;
         p.life -= 0.02;
+        
+        if (p.y >= groundY) {
+          p.y = groundY;
+          p.vx *= 0.5;
+          p.vy = 0;
+        }
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(1, p.radius * p.life), 0, Math.PI * 2);
         ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1.0;
 
         if (p.life <= 0) bloodParticles.splice(i, 1);
       }
 
-      // Render Damage Text Floating
-      for (let i = damageNumbers.length - 1; i >= 0; i--) {
-        const d = damageNumbers[i];
-        d.y += d.vy;
-        d.life -= 0.02;
+      for (let i = slashEffects.length - 1; i >= 0; i--) {
+        let s = slashEffects[i];
+        s.life -= 0.08;
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.angle);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, s.life)})`;
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 15;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-35, 0);
+        ctx.lineTo(35, 0);
+        ctx.stroke();
+        ctx.restore();
+        if (s.life <= 0) slashEffects.splice(i, 1);
+      }
 
-        ctx.font = d.isFatality ? '900 24px Orbitron' : (d.isUltimate ? '900 20px Orbitron' : '700 16px Titan One');
-        ctx.fillStyle = d.isFatality ? '#ef4444' : (d.isCrit ? '#f59e0b' : '#38bdf8');
-        ctx.textAlign = 'center';
-        ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 8;
+      for (let i = damageNumbers.length - 1; i >= 0; i--) {
+        let d = damageNumbers[i];
+        d.y += d.vy;
+        d.life -= 0.025;
+
+        ctx.font = d.isFatality ? "900 32px Orbitron" : (d.isUltimate ? "900 26px Orbitron" : (d.isCrit ? "900 22px Orbitron" : "700 17px Titan One"));
+        ctx.fillStyle = d.isFatality ? "#ff0000" : (d.isUltimate ? "#e0e7ff" : (d.isCrit ? "#f59e0b" : "#ffffff"));
+        ctx.shadowColor = d.isFatality ? "rgba(255, 0, 0, 1)" : (d.isUltimate ? "rgba(168, 85, 247, 0.9)" : (d.isCrit ? "rgba(245, 158, 11, 0.8)" : "rgba(0,0,0,0.8)"));
+        ctx.shadowBlur = d.isFatality ? 30 : (d.isUltimate ? 20 : (d.isCrit ? 12 : 4));
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 5;
+        ctx.globalAlpha = Math.max(0, d.life);
+        ctx.strokeText(d.text, d.x, d.y);
         ctx.fillText(d.text, d.x, d.y);
+        ctx.globalAlpha = 1.0;
         ctx.shadowBlur = 0;
 
         if (d.life <= 0) damageNumbers.splice(i, 1);
@@ -816,603 +1148,621 @@
       requestAnimationFrame(renderCanvas);
     }
 
-    function drawStickman(x, groundY, color, state, dir) {
-      ctx.save();
-      ctx.translate(x, groundY);
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
+    function bukaModalCaraMain() { document.getElementById('modal-guide').classList.remove('hidden'); document.getElementById('modal-guide').classList.add('flex'); }
+    function tutupModalCaraMain() { document.getElementById('modal-guide').classList.add('hidden'); document.getElementById('modal-guide').classList.remove('flex'); }
 
-      const headR = 14;
-      let bodyH = 45;
-      let headY = -bodyH - headR * 2;
-
-      if (state === 'ko') {
-        ctx.rotate((dir * Math.PI) / 2);
-        headY = -headR;
-      } else if (state === 'hurt') {
-        ctx.translate(-dir * 10, -5);
-      }
-
-      // Head
-      ctx.beginPath();
-      ctx.arc(0, headY, headR, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Eyes Glow
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(dir * 4, headY - 2, 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Torso
-      ctx.beginPath();
-      ctx.moveTo(0, headY + headR);
-      ctx.lineTo(0, 0);
-      ctx.stroke();
-
-      // Legs
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(-dir * 12, 30);
-      ctx.moveTo(0, 0);
-      ctx.lineTo(dir * 15, 30);
-      ctx.stroke();
-
-      // Arms
-      ctx.beginPath();
-      const shoulderY = headY + headR + 10;
-      if (state === 'punch') {
-        ctx.moveTo(0, shoulderY);
-        ctx.lineTo(dir * 35, shoulderY - 5);
-        ctx.moveTo(0, shoulderY);
-        ctx.lineTo(dir * 15, shoulderY + 15);
-      } else if (state === 'ultimate') {
-        ctx.moveTo(0, shoulderY);
-        ctx.lineTo(dir * 40, shoulderY - 10);
-        
-        // Beam Laser Effect
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(dir * 40, shoulderY - 20, dir * canvas.width * 0.5, 20);
-      } else {
-        ctx.moveTo(0, shoulderY);
-        ctx.lineTo(-dir * 15, shoulderY + 15);
-        ctx.moveTo(0, shoulderY);
-        ctx.lineTo(dir * 15, shoulderY + 15);
-      }
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    // REALTIME MULTIPLAYER ROOM LISTENERS (Firestore Sync)
-    async function listenToRoom(code) {
-      if (unsubscribeRoom) unsubscribeRoom();
-
-      const rRef = getRoomRef(code);
+    function pilihRole(role) {
+      roleSaya = role;
+      const btnPlayer = document.getElementById('btn-role-player');
+      const btnJuri = document.getElementById('btn-role-juri');
       
-      // Initialize room data if doc does not exist
-      try {
-        const snap = await getDoc(rRef);
-        if (!snap.exists()) {
-          await setDoc(rRef, {
-            hp1: 100,
-            hp2: 100,
-            waktu: 600,
-            lastHit: null,
-            reaction: null,
-            reset: null,
-            isGameOver: false,
-            winner: null
-          });
-        }
-      } catch (e) {
-        console.warn("Error creating initial room doc:", e);
-      }
-
-      // Listen real-time
-      unsubscribeRoom = onSnapshot(rRef, (docSnap) => {
-        if (!docSnap.exists()) return;
-        const data = docSnap.data();
-
-        // Update HP Bars across all connected devices
-        p1State.hp = data.hp1 ?? 100;
-        p2State.hp = data.hp2 ?? 100;
-        updateHPDisplay();
-
-        // Process Hit Events
-        if (data.lastHit && data.lastHit.timestamp > lastProcessedHitTimestamp) {
-          lastProcessedHitTimestamp = data.lastHit.timestamp;
-          const h = data.lastHit;
-          triggerStickmanAttack(h.attacker, h.damage, h.isCrit, h.isUltimate, h.isFatality);
-        }
-
-        // Process Reaction Events
-        if (data.reaction && data.reaction.timestamp > lastProcessedReactionTimestamp) {
-          lastProcessedReactionTimestamp = data.reaction.timestamp;
-          tampilkanEmojiLayar(data.reaction.emoji);
-        }
-
-        // Process Reset Events
-        if (data.reset && data.reset.timestamp > lastProcessedResetTimestamp) {
-          lastProcessedResetTimestamp = data.reset.timestamp;
-          resetMatchStateLocal();
-        }
-
-        // Game Over Check
-        if (data.isGameOver && data.winner) {
-          tampilkanMenang(data.winner);
-        }
-      }, (error) => {
-        console.warn("Realtime sync listener warning:", error);
-      });
-    }
-
-    // Answer Option Handler
-    window.jawab = async function(indexOpt) {
-      if (p1State.hp <= 0 || p2State.hp <= 0) return;
-
-      totalJawabCount++;
-      const currentSoal = bankSoal[idxSoal % bankSoal.length];
-      const isCorrect = (indexOpt === currentSoal.jawaban);
-
-      const victimHP = timSaya === 1 ? p2State.hp : p1State.hp;
-      let damage = 8;
-      let isCrit = false;
-      let isUltimate = false;
-      let isFatality = false;
-
-      if (isCorrect) {
-        comboCount++;
-        totalBenarCount++;
-        if (comboCount > maxComboCount) maxComboCount = comboCount;
-
-        energyGauge = Math.min(100, energyGauge + 25);
-        
-        // Critical calculation
-        if (comboCount >= 3) {
-          isCrit = true;
-          damage = 12 + Math.min(6, comboCount);
-        }
-
-        // Ultimate calculation
-        if (energyGauge >= 100) {
-          isUltimate = true;
-          damage = 22;
-          energyGauge = 0;
-        }
-
-        // Check Fatality condition (Victim HP <= 25 and hit will reduce HP <= 0)
-        if (victimHP <= 25 && (victimHP - damage) <= 0) {
-          isFatality = true;
-          damage = victimHP;
-        }
-
-        // Update Energy Gauge UI
-        const myEnergyBar = document.getElementById(`energy-bar-${timSaya}`);
-        if (myEnergyBar) myEnergyBar.style.width = `${energyGauge}%`;
-
-        // Calculate new HPs
-        let newHp1 = p1State.hp;
-        let newHp2 = p2State.hp;
-
-        if (timSaya === 1) {
-          newHp2 = Math.max(0, p2State.hp - damage);
-        } else {
-          newHp1 = Math.max(0, p1State.hp - damage);
-        }
-
-        // Broadcast hit event to Firestore
-        const roomRef = getRoomRef(roomID);
-        const hitData = {
-          attacker: timSaya,
-          damage: damage,
-          isCrit: isCrit,
-          isUltimate: isUltimate,
-          isFatality: isFatality,
-          timestamp: Date.now()
-        };
-
-        const updatePayload = {
-          hp1: newHp1,
-          hp2: newHp2,
-          lastHit: hitData
-        };
-
-        if (newHp1 <= 0 || newHp2 <= 0) {
-          updatePayload.isGameOver = true;
-          updatePayload.winner = newHp1 <= 0 ? 2 : 1;
-        }
-
-        try {
-          await updateDoc(roomRef, updatePayload);
-        } catch (e) {
-          console.warn("Update hit error:", e);
-        }
-
+      if (role === 'player') {
+        btnPlayer.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
+        btnJuri.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
+        document.getElementById('team-select-box').style.display = 'grid';
       } else {
-        comboCount = 0;
-        playSFX('wrong');
-        sampaikanKomentar("Jawaban kurang tepat! Combo terputus!");
+        btnJuri.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
+        btnPlayer.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
+        document.getElementById('team-select-box').style.display = 'none';
       }
+    }
 
-      // Update Combo Badge
-      const comboBadge = document.getElementById('combo-badge');
-      if (comboCount >= 2) {
-        comboBadge.innerText = `🔥 ${comboCount}X COMBO!`;
-        comboBadge.classList.remove('hidden');
+    function pilihTim(t) {
+      timSaya = t;
+      const btnT1 = document.getElementById('btn-t1');
+      const btnT2 = document.getElementById('btn-t2');
+      if (t === 1) {
+        btnT1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
+        btnT2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
       } else {
-        comboBadge.classList.add('hidden');
-      }
-
-      // Next Question
-      idxSoal++;
-      tampilkanSoal();
-    };
-
-    function updateHPDisplay() {
-      const hp1 = Math.max(0, p1State.hp);
-      const hp2 = Math.max(0, p2State.hp);
-
-      document.getElementById('hp-text-1').innerText = `${hp1} / 100`;
-      document.getElementById('hp-text-2').innerText = `${hp2} / 100`;
-
-      document.getElementById('hp-bar-1').style.width = `${hp1}%`;
-      document.getElementById('hp-bar-2').style.width = `${hp2}%`;
-
-      document.getElementById('spec-hp-1').innerText = hp1;
-      document.getElementById('spec-hp-2').innerText = hp2;
-
-      // Status unggul text for spectator
-      const lblStatus = document.getElementById('lbl-status-unggul');
-      if (hp1 > hp2) lblStatus.innerText = "PETARUNG BIRU UNGGUL";
-      else if (hp2 > hp1) lblStatus.innerText = "PETARUNG MERAH UNGGUL";
-      else lblStatus.innerText = "PERTARUNGAN SEIMBANG";
-
-      // Finish Him banner check
-      const minHp = Math.min(hp1, hp2);
-      if (minHp <= 25 && minHp > 0 && !finishHimTriggered) {
-        finishHimTriggered = true;
-        document.getElementById('banner-finish-him').classList.remove('hidden');
-        document.getElementById('banner-finish-him').classList.add('flex');
-        sampaikanKomentar("FINISH HIM! DARAH CRITICAL, EKSEKUSI SEKARANG!", true);
-        setTimeout(() => {
-          document.getElementById('banner-finish-him').classList.add('hidden');
-          document.getElementById('banner-finish-him').classList.remove('flex');
-        }, 2200);
+        btnT2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 shadow-lg shadow-red-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
+        btnT1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
       }
     }
 
-    function tampilkanSoal() {
-      const q = bankSoal[idxSoal % bankSoal.length];
-      document.getElementById('teks-soal').innerText = q.soal;
-      document.getElementById('opt0').innerText = q.opsi[0];
-      document.getElementById('opt1').innerText = q.opsi[1];
-      document.getElementById('opt2').innerText = q.opsi[2];
-      document.getElementById('opt3').innerText = q.opsi[3];
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
     }
 
-    function tampilkanEmojiLayar(emojiText) {
-      const canvasOverlay = document.getElementById('emoji-canvas');
+    function kirimReaksi(emoji) {
+      if (roomRef) {
+        roomRef.update({ reaction: emoji });
+        setTimeout(() => roomRef.update({ reaction: '' }), 500);
+      }
+    }
+
+    function tampilkanFloatingEmoji(emoji) {
+      playSFX('cheer');
       const el = document.createElement('div');
       el.className = 'floating-emoji';
-      el.innerText = emojiText;
-      el.style.left = `${Math.random() * 80 + 10}%`;
-      canvasOverlay.appendChild(el);
-      setTimeout(() => el.remove(), 2200);
+      el.innerText = emoji;
+      el.style.left = (Math.random() * 80 + 10) + '%';
+      document.getElementById('emoji-canvas').appendChild(el);
+      setTimeout(() => el.remove(), 2300);
     }
 
-    window.kirimReaksi = async function(emojiText) {
-      const roomRef = getRoomRef(roomID);
-      try {
-        await updateDoc(roomRef, {
-          reaction: {
-            emoji: emojiText,
-            timestamp: Date.now()
-          }
-        });
-      } catch(e) {}
-    };
-
-    function resetMatchStateLocal() {
-      p1State = { hp: 100, animState: 'idle' };
-      p2State = { hp: 100, animState: 'idle' };
-      comboCount = 0;
-      energyGauge = 0;
-      finishHimTriggered = false;
-      updateHPDisplay();
-      document.getElementById('overlay-menang').classList.add('hidden');
-      document.getElementById('overlay-menang').classList.remove('flex');
-      sampaikanKomentar("Pertandingan di-reset! Bersiap bertarung kembali!");
-    }
-
-    window.resetMatchHP = async function() {
-      const rRef = getRoomRef(roomID);
-      try {
-        await setDoc(rRef, {
-          hp1: 100,
-          hp2: 100,
-          waktu: 600,
-          lastHit: null,
-          reaction: null,
-          reset: { timestamp: Date.now() },
-          isGameOver: false,
-          winner: null
-        });
-      } catch(e) {}
-    };
-
-    function tampilkanMenang(winner) {
-      const isBlueWin = winner === 1;
-      const winnerName = isBlueWin ? "BLUE FIGHTER 🟦" : "RED FIGHTER 🟥";
-      const loserName = isBlueWin ? "RED FIGHTER 🟥 (K.O.)" : "BLUE FIGHTER 🟦 (K.O.)";
-
-      document.getElementById('teks-menang').innerText = `${winnerName} MENANG DENGAN TELAK!`;
-      document.getElementById('winner-name-badge').innerText = winnerName;
-      document.getElementById('loser-name-badge').innerText = loserName;
-
-      document.getElementById('stat-benar').innerText = totalBenarCount;
-      document.getElementById('stat-combo').innerText = `${maxComboCount}X`;
-      
-      const akurasi = totalJawabCount > 0 ? Math.round((totalBenarCount / totalJawabCount) * 100) : 100;
-      document.getElementById('stat-akurasi').innerText = `${akurasi}%`;
-
-      document.getElementById('overlay-menang').classList.remove('hidden');
-      document.getElementById('overlay-menang').classList.add('flex');
-
-      sampaikanKomentar(`PERTANDINGAN SELESAI! ${winnerName} berhasil memenangkan pertarungan!`, true);
-    }
-
-    window.pilihRole = function(role) {
-      roleSaya = role;
-      const btnP = document.getElementById('btn-role-player');
-      const btnJ = document.getElementById('btn-role-juri');
-      const teamBox = document.getElementById('team-select-box');
-
-      if (role === 'player') {
-        btnP.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
-        btnJ.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
-        teamBox.classList.remove('hidden');
-      } else {
-        btnJ.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md";
-        btnP.className = "flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white";
-        teamBox.classList.add('hidden');
-      }
-    };
-
-    window.pilihTim = function(t) {
-      timSaya = t;
-      const btn1 = document.getElementById('btn-t1');
-      const btn2 = document.getElementById('btn-t2');
-
-      if (t === 1) {
-        btn1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
-        btn2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
-      } else {
-        btn2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 shadow-lg shadow-rose-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
-        btn1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
-      }
-    };
-
-    window.gabungRoom = async function() {
-      const codeInput = document.getElementById('room-code').value.trim();
-      if (!codeInput) {
-        tampilkanCustomModal("Peringatan", "Silakan masukkan Kode Room mabar!", "⚠️");
+    function gabungRoom() {
+      const inputCode = document.getElementById('room-code').value.trim();
+      if (!inputCode) {
+        tampilkanCustomModal("Peringatan", "Masukkan Kode Room terlebih dahulu!", "⚠️");
         return;
       }
-
-      roomID = codeInput;
+      roomID = inputCode;
       document.getElementById('lbl-room').innerText = roomID;
+      document.getElementById('lbl-tim').innerText = timSaya === 1 ? "BLUE FIGHTER" : "RED FIGHTER";
+      document.getElementById('lbl-tim').className = timSaya === 1 ? "text-cyan-400 font-titan" : "text-rose-400 font-titan";
+
       document.getElementById('main-menu').classList.add('hidden');
       document.getElementById('game-container').classList.remove('hidden');
       document.getElementById('game-container').classList.add('flex');
-
-      resizeCanvas();
 
       if (roleSaya === 'juri') {
         document.getElementById('card-soal-box').classList.add('hidden');
         document.getElementById('grid-jawaban-box').classList.add('hidden');
         document.getElementById('spectator-panel').classList.remove('hidden');
         document.getElementById('spectator-panel').classList.add('flex');
-        document.getElementById('lbl-tim').innerText = "SPECTATOR 📺";
+        sampaikanKomentar("Mode Juri Spectator aktif! Anda sedang mengamati pertarungan live.", true);
       } else {
         document.getElementById('card-soal-box').classList.remove('hidden');
         document.getElementById('grid-jawaban-box').classList.remove('hidden');
         document.getElementById('spectator-panel').classList.add('hidden');
-        document.getElementById('lbl-tim').innerText = timSaya === 1 ? "BLUE FIGHTER 🟦" : "RED FIGHTER 🟥";
-        tampilkanSoal();
+        sampaikanKomentar(`Pertarungan di Room ${roomID} dimulai! Selamat bertarung para pejuang!`, true);
       }
 
       startBGM();
-      requestAnimationFrame(renderCanvas);
-      listenToRoom(roomID);
-    };
 
-    window.keluarGame = function() {
-      stopBGM();
-      if (unsubscribeRoom) unsubscribeRoom();
-      document.getElementById('game-container').classList.add('hidden');
-      document.getElementById('overlay-menang').classList.add('hidden');
-      document.getElementById('main-menu').classList.remove('hidden');
-    };
+      roomRef = db.ref('rooms/room_' + roomID);
+      inisiatisasiRoom();
+      tampilkanSoal();
+      setTimeout(resizeCanvas, 100);
+    }
 
-    window.specialResetRoomLobby = function() {
-      const code = document.getElementById('room-code').value.trim() || '8888';
-      tampilkanCustomModal("Reset Total Room", `Yakin ingin menghapus dan mereset status Room ${code}?`, "💥", true, async () => {
-        const rRef = getRoomRef(code);
-        await setDoc(rRef, {
-          hp1: 100,
-          hp2: 100,
-          waktu: 600,
-          lastHit: null,
-          reaction: null,
-          reset: { timestamp: Date.now() },
-          isGameOver: false,
-          winner: null
-        });
-        tampilkanCustomModal("Berhasil", `Room ${code} telah di-reset total!`, "✅");
-      });
-    };
+    function specialResetRoomLobby() {
+      const code = document.getElementById('room-code').value.trim();
+      if (!code || code.length < 3) {
+        tampilkanCustomModal("Peringatan", "Masukkan kode room yang ingin di-reset (minimal 3 digit)!", "⚠️");
+        return;
+      }
+      tampilkanCustomModal(
+        "Reset Total Room",
+        `Apakah Anda yakin ingin MENGHAPUS SEMUA DATA room "${code}"? Semua HP dan progres akan di-reset total.`,
+        "💥",
+        true,
+        () => {
+          const targetRoomRef = db.ref('rooms/room_' + code);
+          targetRoomRef.remove()
+            .then(() => {
+              tampilkanCustomModal("Berhasil", `Room "${code}" berhasil di-reset total!`, "✅");
+            })
+            .catch((err) => {
+              tampilkanCustomModal("Gagal", "Error: " + err.message, "❌");
+            });
+        }
+      );
+    }
 
-    window.specialResetRoomInGame = function() {
-      window.specialResetRoomLobby();
-    };
+    function specialResetRoomInGame() {
+      if (!roomRef) return;
+      const code = document.getElementById('lbl-room').innerText;
+      tampilkanCustomModal(
+        "Reset Room In-Game",
+        `Reset total pertarungan di room "${code}"? HP akan kembali ke 100 dan timer di-reset ke 10 menit!`,
+        "💥",
+        true,
+        () => {
+          roomRef.set({ hp1: 100, hp2: 100, waktu: 600, reaction: '', hitEvent: null, isGameOver: false })
+            .then(() => {
+              tampilkanCustomModal("Berhasil", "Pertarungan di-reset total!", "✅");
+            });
+        }
+      );
+    }
 
-    window.bukaEditorSoal = function() {
-      renderBankSoalEditor();
+    function bukaEditorSoal() {
       document.getElementById('modal-editor').classList.remove('hidden');
       document.getElementById('modal-editor').classList.add('flex');
-    };
+      renderFormEditor();
+    }
 
-    window.tutupEditorSoal = function() {
+    function tutupEditorSoal() {
       document.getElementById('modal-editor').classList.add('hidden');
-    };
+      document.getElementById('modal-editor').classList.remove('flex');
+    }
 
-    function renderBankSoalEditor() {
+    function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
       container.innerHTML = '';
 
       bankSoal.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2 text-xs";
-        card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="font-titan text-indigo-400">Soal #${index + 1}</span>
-            <button class="text-rose-400 hover:text-rose-300 font-bold" onclick="hapusSoal(${index})">✕ Hapus</button>
+        const div = document.createElement('div');
+        div.className = 'bg-slate-900 border border-slate-800 p-3.5 rounded-2xl text-xs space-y-2';
+        div.innerHTML = `
+          <div class="flex justify-between items-center font-bold text-amber-400">
+            <span>Soal #${index + 1}</span>
+            <button class="text-red-400 hover:text-red-300 font-bold" onclick="hapusSoal(${index})">Hapus 🗑</button>
           </div>
-          <input type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-white font-bold" value="${item.soal}" onchange="updateSoalText(${index}, this.value)">
+          <input type="text" value="${item.soal.replace(/"/g, '&quot;')}" onchange="updateSoalText(${index}, this.value)" placeholder="Teks Soal" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-indigo-500">
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-slate-200" value="${item.opsi[0]}" onchange="updateOpsiText(${index}, 0, this.value)">
-            <input type="text" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-slate-200" value="${item.opsi[1]}" onchange="updateOpsiText(${index}, 1, this.value)">
-            <input type="text" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-slate-200" value="${item.opsi[2]}" onchange="updateOpsiText(${index}, 2, this.value)">
-            <input type="text" class="bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-slate-200" value="${item.opsi[3]}" onchange="updateOpsiText(${index}, 3, this.value)">
-          </div>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-slate-400">Kunci Jawaban:</span>
-            <select class="bg-slate-950 border border-slate-700 rounded-lg p-1 text-amber-400 font-bold" onchange="updateJawaban(${index}, this.value)">
-              <option value="0" ${item.jawaban === 0 ? 'selected' : ''}>Opsi A</option>
-              <option value="1" ${item.jawaban === 1 ? 'selected' : ''}>Opsi B</option>
-              <option value="2" ${item.jawaban === 2 ? 'selected' : ''}>Opsi C</option>
-              <option value="3" ${item.jawaban === 3 ? 'selected' : ''}>Opsi D</option>
-            </select>
+            ${item.opsi.map((opt, oIdx) => `
+              <div class="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <input type="radio" name="ans_${index}" ${item.jawaban === oIdx ? 'checked' : ''} onchange="updateSoalJawaban(${index}, ${oIdx})">
+                <input type="text" value="${opt.replace(/"/g, '&quot;')}" onchange="updateSoalOpsi(${index}, ${oIdx}, this.value)" placeholder="Opsi ${String.fromCharCode(65+oIdx)}" class="w-full bg-transparent text-white outline-none">
+              </div>
+            `).join('')}
           </div>
         `;
-        container.appendChild(card);
+        container.appendChild(div);
       });
     }
 
-    window.tambahBarisSoal = function() {
-      bankSoal.push({
-        soal: "Soal Baru Pertarungan?",
-        opsi: ["Jawaban A", "Jawaban B", "Jawaban C", "Jawaban D"],
-        jawaban: 0
+    function tambahBarisSoal() {
+      bankSoal.push({ soal: "Pertanyaan Baru", opsi: ["Opsi A", "Opsi B", "Opsi C", "Opsi D"], jawaban: 0 });
+      renderFormEditor();
+    }
+
+    function hapusSoal(index) {
+      bankSoal.splice(index, 1);
+      renderFormEditor();
+    }
+
+    function updateSoalText(index, val) { bankSoal[index].soal = val; }
+    function updateSoalJawaban(index, val) { bankSoal[index].jawaban = parseInt(val); }
+    function updateSoalOpsi(index, oIdx, val) { bankSoal[index].opsi[oIdx] = val; }
+
+    function resetSemuaSoal() {
+      tampilkanCustomModal("Reset Soal", "Hapus seluruh bank soal?", "🗑", true, () => {
+        bankSoal = [];
+        renderFormEditor();
       });
-      renderBankSoalEditor();
-    };
+    }
 
-    window.hapusSoal = function(idx) {
-      bankSoal.splice(idx, 1);
-      renderBankSoalEditor();
-    };
-
-    window.updateSoalText = function(idx, val) { bankSoal[idx].soal = val; };
-    window.updateOpsiText = function(idx, optIdx, val) { bankSoal[idx].opsi[optIdx] = val; };
-    window.updateJawaban = function(idx, val) { bankSoal[idx].jawaban = parseInt(val); };
-
-    window.resetSemuaSoal = function() {
-      bankSoal = [
-        { soal: "Berapakah hasil dari 15 x 12?", opsi: ["170", "180", "190", "200"], jawaban: 1 }
-      ];
-      renderBankSoalEditor();
-    };
-
-    window.simpanKeDatabase = function() {
+    function simpanKeDatabase() {
+      tampilkanCustomModal("Tersimpan", "Bank soal berhasil disimpan di memori game!", "💾");
       tutupEditorSoal();
-      tampilkanCustomModal("Tersimpan", "Bank Soal berhasil diperbarui di memori game!", "💾");
-    };
+      if (document.getElementById('game-container').classList.contains('flex')) {
+        tampilkanSoal();
+      }
+    }
 
-    window.bacaFileCSV = function(e) {
+    function parseCSVLine(line, delimiter) {
+      const regex = new RegExp(
+        `(?:^|${delimiter})(?:"([^"]*)"|([^"${delimiter}]*))`,
+        'g'
+      );
+      const row = [];
+      let matches;
+      while ((matches = regex.exec(line)) !== null) {
+        let val = matches[1] !== undefined ? matches[1] : matches[2];
+        row.push(val ? val.trim() : '');
+      }
+      return row;
+    }
+
+    function bacaFileCSV(e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(evt) {
         const text = evt.target.result;
-        const lines = text.split('\n');
-        const newSoal = [];
-        lines.forEach(line => {
-          const cols = line.split(',');
-          if (cols.length >= 6) {
-            newSoal.push({
-              soal: cols[0].trim(),
-              opsi: [cols[1].trim(), cols[2].trim(), cols[3].trim(), cols[4].trim()],
-              jawaban: parseInt(cols[5].trim()) || 0
-            });
-          }
-        });
-        if (newSoal.length > 0) {
-          bankSoal = newSoal;
-          renderBankSoalEditor();
-          tampilkanCustomModal("Sukses Import", `Berhasil mengimpor ${newSoal.length} soal dari CSV!`, "📁");
+        const rawLines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        
+        if (rawLines.length === 0) {
+          tampilkanCustomModal("Gagal", "File CSV kosong!", "❌");
+          return;
         }
+
+        const firstLine = rawLines[0];
+        let delimiter = ';';
+        const countSemi = (firstLine.match(/;/g) || []).length;
+        const countComma = (firstLine.match(/,/g) || []).length;
+        const countTab = (firstLine.match(/\t/g) || []).length;
+
+        if (countComma > countSemi && countComma >= countTab) delimiter = ',';
+        else if (countTab > countSemi && countTab > countComma) delimiter = '\t';
+        else delimiter = ';';
+
+        const listBaru = [];
+
+        rawLines.forEach((line, index) => {
+          let cols = parseCSVLine(line, delimiter);
+          if (cols.length < 5) cols = line.split(delimiter).map(c => c.trim().replace(/^"|"$/g, ''));
+          if (cols.length < 5) return;
+
+          const col0Lower = cols[0].toLowerCase();
+          if (index === 0 && (col0Lower.includes('soal') || col0Lower.includes('question') || col0Lower.includes('pertanyaan'))) {
+            return;
+          }
+
+          const soalText = cols[0];
+          const opsi = [cols[1] || '', cols[2] || '', cols[3] || '', cols[4] || ''];
+
+          let jawaban = 0;
+          if (cols.length >= 6 && cols[5] !== undefined) {
+            const rawAns = cols[5].toString().trim().toUpperCase();
+            if (rawAns === 'A') jawaban = 0;
+            else if (rawAns === 'B') jawaban = 1;
+            else if (rawAns === 'C') jawaban = 2;
+            else if (rawAns === 'D') jawaban = 3;
+            else {
+              const num = parseInt(rawAns);
+              if (!isNaN(num)) {
+                if (num >= 1 && num <= 4 && rawAns !== '0') jawaban = num - 1;
+                else if (num >= 0 && num <= 3) jawaban = num;
+              } else {
+                const foundIdx = opsi.findIndex(o => o.trim().toLowerCase() === rawAns.toLowerCase());
+                if (foundIdx !== -1) jawaban = foundIdx;
+              }
+            }
+          }
+
+          listBaru.push({ soal: soalText, opsi: opsi, jawaban: jawaban });
+        });
+
+        if (listBaru.length > 0) {
+          bankSoal = listBaru;
+          renderFormEditor();
+          tampilkanCustomModal("Berhasil", `Berhasil mengimpor ${listBaru.length} soal dari CSV!`, "📁");
+        } else {
+          tampilkanCustomModal("Gagal", "Format CSV tidak dapat diproses.", "❌");
+        }
+        e.target.value = '';
       };
       reader.readAsText(file);
-    };
+    }
 
-    window.toggleFullScreen = function() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
+    function formatWaktu(detik) {
+      let m = Math.floor(detik / 60);
+      let s = detik % 60;
+      let mm = m < 10 ? "0" + m : m;
+      let ss = s < 10 ? "0" + s : s;
+      return `${mm}:${ss}`;
+    }
+
+    function tampilkanSoal() {
+      if (!bankSoal || bankSoal.length === 0) {
+        document.getElementById('teks-soal').innerText = "Belum ada soal! Buka Bank Soal untuk menambah atau mengimpor soal.";
+        for (let i = 0; i < 4; i++) {
+          const optEl = document.getElementById('opt' + i);
+          if (optEl) optEl.innerText = "-";
+        }
+        return;
+      }
+      const cur = bankSoal[idxSoal % bankSoal.length];
+      document.getElementById('teks-soal').innerText = cur.soal;
+      for (let i = 0; i < 4; i++) {
+        const optEl = document.getElementById('opt' + i);
+        if (optEl) optEl.innerText = (cur.opsi && cur.opsi[i] !== undefined) ? cur.opsi[i] : "-";
+      }
+    }
+
+    // MULTIPLAYER HOST-ONLY TIMER SYNC (PLAYER 1 MANAGES TIMER)
+    function mulaiHitungMundurStabil() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!roomRef) return;
+        
+        // Hanya Player 1 (Blue) yang mengelola siklus timer server agar tidak terjadi race condition
+        if (timSaya === 1) {
+          roomRef.child('waktu').transaction((currWaktu) => {
+            if (currWaktu === null) return 600;
+            if (currWaktu <= 0) return 0;
+            return currWaktu - 1;
+          }, (error, committed, snapshot) => {
+            if (snapshot) {
+              const remaining = snapshot.val();
+              if (remaining <= 0) {
+                clearInterval(timerInterval);
+                if (p1State.hp > p2State.hp) akhiriGame("⏱️ WAKTU HABIS! BLUE FIGHTER UNGGUL & MENANG!", true);
+                else if (p2State.hp > p1State.hp) akhiriGame("⏱️ WAKTU HABIS! RED FIGHTER UNGGUL & MENANG!", true);
+                else akhiriGame("⏱️ WAKTU HABIS! PERTANDINGAN SERI (DRAW)!", true);
+              }
+            }
+          });
+        }
+      }, 1000);
+    }
+
+    function inisiatisasiRoom() {
+      roomRef.get().then((snapshot) => {
+        if (!snapshot.exists()) {
+          roomRef.set({ hp1: 100, hp2: 100, waktu: 600, reaction: '', hitEvent: null, isGameOver: false });
+        }
+        dengarkanServer();
+        mulaiHitungMundurStabil();
+      });
+    }
+
+    function dengarkanServer() {
+      roomRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        p1State.hp = data.hp1 !== undefined ? data.hp1 : 100;
+        p2State.hp = data.hp2 !== undefined ? data.hp2 : 100;
+
+        if (data.waktu !== undefined) {
+          document.getElementById('waktu').innerText = formatWaktu(data.waktu);
+        }
+
+        if ((p1State.hp <= 25 && p1State.hp > 0) || (p2State.hp <= 25 && p2State.hp > 0)) {
+          triggerFinishHimBanner();
+        }
+
+        const danger1 = document.getElementById('danger-badge-1');
+        const danger2 = document.getElementById('danger-badge-2');
+        if (p1State.hp <= 25 && p1State.hp > 0) danger1.classList.remove('hidden'); else danger1.classList.add('hidden');
+        if (p2State.hp <= 25 && p2State.hp > 0) danger2.classList.remove('hidden'); else danger2.classList.add('hidden');
+
+        if (p1State.hp > 0 && p1State.animState === 'ko') p1State.animState = 'idle';
+        if (p2State.hp > 0 && p2State.animState === 'ko') p2State.animState = 'idle';
+
+        document.getElementById('hp-bar-1').style.width = p1State.hp + "%";
+        document.getElementById('hp-bar-2').style.width = p2State.hp + "%";
+        document.getElementById('hp-text-1').innerText = `${p1State.hp} / 100`;
+        document.getElementById('hp-text-2').innerText = `${p2State.hp} / 100`;
+
+        if (roleSaya === 'juri') {
+          document.getElementById('spec-hp-1').innerText = p1State.hp;
+          document.getElementById('spec-hp-2').innerText = p2State.hp;
+          const statusLbl = document.getElementById('lbl-status-unggul');
+          if (p1State.hp > p2State.hp) { statusLbl.innerText = "BLUE FIGHTER UNGGUL"; statusLbl.className = "text-cyan-400 font-bold"; }
+          else if (p2State.hp > p1State.hp) { statusLbl.innerText = "RED FIGHTER UNGGUL"; statusLbl.className = "text-rose-400 font-bold"; }
+          else { statusLbl.innerText = "PERTARUNGAN SEIMBANG"; statusLbl.className = "text-amber-400 font-bold"; }
+        }
+
+        if (data.reaction) {
+          tampilkanFloatingEmoji(data.reaction);
+        }
+
+        // Multi-event Hit Processing with Timestamp Checking
+        if (data.hitEvent && data.hitEvent.timestamp > lastHitTimestamp) {
+          lastHitTimestamp = data.hitEvent.timestamp;
+          triggerStickmanAttack(
+            data.hitEvent.attacker, 
+            data.hitEvent.damage, 
+            data.hitEvent.isCrit, 
+            data.hitEvent.isUltimate,
+            data.hitEvent.isFatality
+          );
+        }
+
+        if (data.isGameOver && data.winnerMsg) {
+          akhiriGame(data.winnerMsg, false);
+        } else if (p1State.hp <= 0 && !data.isGameOver) {
+          p1State.animState = 'ko';
+          akhiriGame("💀 RED FIGHTER FATALITY WINNER!", true);
+        } else if (p2State.hp <= 0 && !data.isGameOver) {
+          p2State.animState = 'ko';
+          akhiriGame("💀 BLUE FIGHTER FATALITY WINNER!", true);
+        }
+      });
+    }
+
+    function resetMatchHP() {
+      comboCount = 0;
+      maxComboCount = 0;
+      totalBenarCount = 0;
+      totalJawabCount = 0;
+      energyGauge = 0;
+      if (roomRef) {
+        roomRef.update({ hp1: 100, hp2: 100, isGameOver: false, winnerMsg: null });
+      }
+      updateComboBadge();
+      updateEnergyBars();
+    }
+
+    function melepaskanGame() {
+      stopBGM();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function keluarGame() {
+      melepaskanGame();
+      comboCount = 0;
+      maxComboCount = 0;
+      totalBenarCount = 0;
+      totalJawabCount = 0;
+      energyGauge = 0;
+      finishHimTriggered = false;
+      isFatalityActive = false;
+      isAnsweringLocked = false;
+      bgmTempoMs = 220;
+      updateComboBadge();
+      updateEnergyBars();
+      if (roomRef) { roomRef.off(); roomRef = null; }
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      document.getElementById('game-container').classList.add('hidden');
+      document.getElementById('overlay-menang').classList.add('hidden');
+      document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    function updateEnergyBars() {
+      const myBar = timSaya === 1 ? document.getElementById('energy-bar-1') : document.getElementById('energy-bar-2');
+      if (myBar) myBar.style.width = energyGauge + "%";
+    }
+
+    function updateComboBadge() {
+      const badge = document.getElementById('combo-badge');
+      if (comboCount >= 3) {
+        badge.innerText = `🔥 ${comboCount}X STREAK!`;
+        badge.classList.remove('hidden');
       } else {
-        if (document.exitFullscreen) document.exitFullscreen();
+        badge.classList.add('hidden');
       }
-    };
+    }
 
-    window.bukaModalCaraMain = function() {
-      document.getElementById('modal-guide').classList.remove('hidden');
-      document.getElementById('modal-guide').classList.add('flex');
-    };
+    // SAFE MULTIPLAYER ANSWERING SYSTEM (PREVENTS RACE CONDITION & LAG)
+    function jawab(pilihan) {
+      if (bankSoal.length === 0 || roleSaya === 'juri' || isAnsweringLocked) return;
+      if (p1State.hp <= 0 || p2State.hp <= 0) return;
 
-    window.tutupModalCaraMain = function() {
-      document.getElementById('modal-guide').classList.add('hidden');
-    };
-
-    window.tampilkanCustomModal = function(title, body, icon = "⚠️", showCancel = false, onConfirm = null) {
-      document.getElementById('modal-title').innerText = title;
-      document.getElementById('modal-body').innerText = body;
-      document.getElementById('modal-icon').innerText = icon;
+      isAnsweringLocked = true; // Kunci tombol selama 550ms
+      let s = bankSoal[idxSoal % bankSoal.length];
+      let isBenar = (pilihan === s.jawaban);
       
-      const btnCancel = document.getElementById('modal-btn-cancel');
-      if (showCancel) btnCancel.classList.remove('hidden');
-      else btnCancel.classList.add('hidden');
+      totalJawabCount++;
 
-      customModalCallback = onConfirm;
-      const modal = document.getElementById('custom-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    };
+      let damageDealt = 8;
+      let isCrit = false;
+      let isUltimate = false;
+      let isFatality = false;
 
-    window.tutupCustomModal = function() {
-      const modal = document.getElementById('custom-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      if (customModalCallback) {
-        customModalCallback();
-        customModalCallback = null;
+      const enemyHpKey = timSaya === 1 ? 'hp2' : 'hp1';
+      const enemyCurrentHp = timSaya === 1 ? p2State.hp : p1State.hp;
+      const myName = timSaya === 1 ? "Petarung Biru" : "Petarung Merah";
+      const enemyName = timSaya === 1 ? "Petarung Merah" : "Petarung Biru";
+
+      if (isBenar) {
+        totalBenarCount++;
+        comboCount++;
+        if (comboCount > maxComboCount) maxComboCount = comboCount;
+
+        energyGauge = Math.min(100, energyGauge + 20);
+
+        if (comboCount === 3) {
+          sampaikanKomentar(`Luar biasa! ${myName} mendapatkan 3 kali Combo Streak berturut-turut!`, true);
+        }
+
+        if (enemyCurrentHp <= 15 || (energyGauge >= 100 && enemyCurrentHp <= 25)) {
+          damageDealt = 100;
+          isFatality = true;
+        } else if (energyGauge >= 100) {
+          damageDealt = 22;
+          isUltimate = true;
+          energyGauge = 0;
+        } else if (comboCount >= 6) {
+          damageDealt = 15;
+          isCrit = true;
+        } else if (comboCount >= 3) {
+          damageDealt = 12;
+          isCrit = true;
+        }
+
+        if (roomRef) {
+          roomRef.child(enemyHpKey).transaction((currHp) => {
+            let current = (currHp === null) ? 100 : currHp;
+            return Math.max(0, current - damageDealt);
+          }, (error, committed, snapshot) => {
+            if (committed) {
+              roomRef.child('hitEvent').set({
+                attacker: timSaya,
+                damage: damageDealt,
+                isCrit: isCrit,
+                isUltimate: isUltimate,
+                isFatality: isFatality,
+                timestamp: Date.now() + Math.random()
+              });
+            }
+          });
+        }
+
+      } else {
+        playSFX('wrong');
+        comboCount = 0;
+        damageDealt = 6;
+        const enemyTeam = timSaya === 1 ? 2 : 1;
+        const myHpKey = timSaya === 1 ? 'hp1' : 'hp2';
+
+        const wrongPhrases = [
+          `BLUNDER PARAH! Jawaban ${myName} salah dan langsung dihajar serangan balik oleh ${enemyName}!`,
+          `SAYANG SEKALI! Jawaban ${myName} meleset, ${enemyName} memanfaatkan celah untuk menyerang!`
+        ];
+        sampaikanKomentar(wrongPhrases[Math.floor(Math.random() * wrongPhrases.length)]);
+
+        if (roomRef) {
+          roomRef.child(myHpKey).transaction((currHp) => {
+            let current = (currHp === null) ? 100 : currHp;
+            return Math.max(0, current - damageDealt);
+          }, (error, committed, snapshot) => {
+            if (committed) {
+              roomRef.child('hitEvent').set({
+                attacker: enemyTeam,
+                damage: damageDealt,
+                isCrit: false,
+                isUltimate: false,
+                isFatality: false,
+                timestamp: Date.now() + Math.random()
+              });
+            }
+          });
+        }
       }
-    };
 
-    window.toggleBGM = function() {
-      isBGMEnabled = !isBGMEnabled;
-      document.getElementById('txt-bgm-status').innerText = isBGMEnabled ? "Musik: ON" : "Musik: OFF";
-      if (isBGMEnabled) startBGM();
-      else stopBGM();
-    };
+      updateComboBadge();
+      updateEnergyBars();
+      idxSoal++;
+      tampilkanSoal();
 
-    window.toggleVoiceAnnouncer = function() {
-      isVoiceEnabled = !isVoiceEnabled;
-      document.getElementById('txt-voice-status').innerText = isVoiceEnabled ? "Suara: ON" : "Suara: OFF";
-    };
+      // Buka kunci input setelah 550ms
+      setTimeout(() => {
+        isAnsweringLocked = false;
+      }, 550);
+    }
 
+    function akhiriGame(pesan, updateServer = false) {
+      if (timerInterval) clearInterval(timerInterval);
+      stopBGM();
+      playSFX('win');
+
+      const winnerBadge = document.getElementById('winner-name-badge');
+      const loserBadge = document.getElementById('loser-name-badge');
+
+      if (p1State.hp > p2State.hp) {
+        if (winnerBadge) winnerBadge.innerText = "BLUE FIGHTER 🟦";
+        if (loserBadge) loserBadge.innerText = "RED FIGHTER 🟥 (K.O.)";
+        sampaikanKomentar("Pertandingan selesai! Petarung Biru keluar sebagai juara sejati arena!", true);
+      } else if (p2State.hp > p1State.hp) {
+        if (winnerBadge) winnerBadge.innerText = "RED FIGHTER 🟥";
+        if (loserBadge) loserBadge.innerText = "BLUE FIGHTER 🟦 (K.O.)";
+        sampaikanKomentar("Pertandingan selesai! Petarung Merah keluar sebagai juara sejati arena!", true);
+      } else {
+        if (winnerBadge) winnerBadge.innerText = "SERI / DRAW 🤝";
+        if (loserBadge) loserBadge.innerText = "SERI / DRAW 🤝";
+        sampaikanKomentar("Waktu habis! Pertandingan berakhir imbang tanpa pemenang!", true);
+      }
+
+      document.getElementById('stat-benar').innerText = totalBenarCount;
+      document.getElementById('stat-combo').innerText = maxComboCount + "X";
+      const akurasi = totalJawabCount > 0 ? Math.round((totalBenarCount / totalJawabCount) * 100) : 0;
+      document.getElementById('stat-akurasi').innerText = akurasi + "%";
+
+      document.getElementById('teks-menang').innerText = pesan;
+      document.getElementById('overlay-menang').classList.remove('hidden');
+      document.getElementById('overlay-menang').classList.add('flex');
+
+      if (updateServer && roomRef) {
+        roomRef.update({ isGameOver: true, winnerMsg: pesan });
+      }
+    }
+
+    window.onload = function() {
+      resizeCanvas();
+      renderCanvas();
+    };
   </script>
 </body>
 </html>
