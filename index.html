@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Battle Stickman Quiz Arena HD - Mabar Edition Fixed</title>
+  <title>Tarik Tambang Arena HD - Live Edition</title>
   
   <!-- Firebase JS SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -13,7 +13,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Titan+One&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Titan+One&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -23,12 +23,13 @@
     }
     body {
       font-family: 'Fredoka', sans-serif;
-      background: #030712;
-      touch-action: manipulation;
+      background: #090d16;
     }
-    .font-titan { font-family: 'Titan One', cursive; }
-    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-titan {
+      font-family: 'Titan One', cursive;
+    }
 
+    /* Floating Emoji Canvas */
     #emoji-canvas {
       position: fixed;
       inset: 0;
@@ -39,181 +40,150 @@
     .floating-emoji {
       position: absolute;
       bottom: -60px;
-      font-size: 44px;
+      font-size: 40px;
       animation: floatUp 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.6));
     }
     @keyframes floatUp {
       0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-115vh) scale(1.4) rotate(25deg); opacity: 0; }
+      100% { transform: translateY(-115vh) scale(1.3) rotate(20deg); opacity: 0; }
     }
 
+    /* Modern Glassmorphism & UI Accents */
     .glass-card {
-      background: rgba(15, 23, 42, 0.88);
+      background: rgba(30, 41, 59, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
+    
     .glass-btn {
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .glass-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.96);
     }
 
-    .stadium-shake { animation: shakeArena 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+    /* Punch Hit Effect */
+    .punch-hit {
+      position: absolute;
+      font-size: 36px;
+      z-index: 20;
+      pointer-events: none;
+      animation: hitPop 0.4s ease-out forwards;
+    }
+    @keyframes hitPop {
+      0% { transform: scale(0.2) rotate(-25deg); opacity: 0; }
+      50% { transform: scale(1.6) rotate(15deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 0; }
+    }
+
+    /* Character Punching Animations */
+    .anim-punch-naruto { animation: punchRight 0.3s ease-in-out; }
+    @keyframes punchRight {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(35px) scale(1.15); }
+      100% { transform: translateX(0); }
+    }
+
+    .anim-punch-sasuke { animation: punchLeft 0.3s ease-in-out; }
+    @keyframes punchLeft {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(-35px) scale(1.15); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Stadium Shake */
+    .stadium-shake { animation: shakeArena 0.3s ease-in-out; }
     @keyframes shakeArena {
       0%, 100% { transform: translate(0, 0); }
-      15% { transform: translate(-10px, 7px); }
-      30% { transform: translate(10px, -7px); }
-      45% { transform: translate(-7px, -4px); }
-      60% { transform: translate(7px, 4px); }
-      75% { transform: translate(-3px, 2px); }
+      20% { transform: translate(-6px, 4px); }
+      40% { transform: translate(6px, -4px); }
+      60% { transform: translate(-4px, -4px); }
+      80% { transform: translate(4px, 4px); }
     }
 
+    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
-
-    .hp-pulse-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.5); }
-    .hp-pulse-red { box-shadow: 0 0 15px rgba(239, 68, 68, 0.9), inset 0 0 8px rgba(255, 255, 255, 0.5); }
-
-    .arena-modern-bg {
-      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.95), 0 0 25px rgba(99, 102, 241, 0.25);
-    }
-
-    @keyframes finishPulse {
-      0%, 100% { transform: scale(1); text-shadow: 0 0 20px #ef4444, 0 0 40px #dc2626; }
-      50% { transform: scale(1.15); text-shadow: 0 0 40px #ff0000, 0 0 70px #ff4500; }
-    }
-    .animate-finish-him { animation: finishPulse 0.6s infinite ease-in-out; }
-
-    @keyframes fatalityBannerAnim {
-      0% { transform: scale(3.5) rotate(-6deg); opacity: 0; filter: blur(12px); }
-      40% { transform: scale(0.95) rotate(2deg); opacity: 1; filter: blur(0px); }
-      60% { transform: scale(1.1) rotate(0deg); }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-    .animate-fatality-text { animation: fatalityBannerAnim 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
-    .commentary-ticker-box {
-      background: rgba(15, 23, 42, 0.95);
-      border: 1.5px solid rgba(245, 158, 11, 0.7);
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.15);
-    }
   </style>
 </head>
-<body class="h-dvh w-screen overflow-hidden text-white flex flex-col justify-between">
+<body class="h-dvh w-screen overflow-hidden text-white">
 
+  <!-- EMOJI CANVAS -->
   <div id="emoji-canvas"></div>
 
-  <!-- OVERLAY BANNERS -->
-  <div id="banner-finish-him" class="fixed inset-0 z-[80] pointer-events-none hidden items-center justify-center bg-red-950/40 backdrop-blur-xs">
-    <div class="text-center animate-finish-him">
-      <div class="font-orbitron font-black text-5xl md:text-7xl text-red-500 tracking-widest italic drop-shadow-[0_0_35px_rgba(239,68,68,1)]">
-        FINISH HIM!
-      </div>
-      <div class="font-titan text-amber-400 text-lg md:text-2xl mt-2 tracking-wider drop-shadow-md">
-        🔥 EKSEKUSI LAWAN DENGAN FATALITY! 🔥
-      </div>
-    </div>
-  </div>
-
-  <div id="banner-fatality" class="fixed inset-0 z-[85] pointer-events-none hidden items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="text-center animate-fatality-text">
-      <div id="fatality-title-text" class="font-orbitron font-black text-6xl md:text-8xl text-red-600 tracking-widest italic drop-shadow-[0_0_50px_rgba(220,38,38,1)]">
-        FATALITY!
-      </div>
-      <div id="fatality-move-name" class="font-titan text-amber-400 text-xl md:text-3xl mt-3 tracking-widest uppercase drop-shadow-[0_0_15px_rgba(245,158,11,0.9)]">
-        ⚡ THUNDER GOD SLICE ⚡
-      </div>
-      <div id="fatality-loser-text" class="font-titan text-red-500 text-lg md:text-2xl mt-2 tracking-wider uppercase font-black drop-shadow-[0_0_15px_rgba(239,68,68,0.9)] animate-pulse">
-        💀 RED FIGHTER TER-EKSEKUSI! 💀
-      </div>
-    </div>
-  </div>
-
-  <!-- CUSTOM MODAL -->
-  <div id="custom-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="glass-card rounded-3xl p-6 w-full max-w-sm text-center border-amber-500/40 shadow-2xl animate-fade-in">
-      <div id="modal-icon" class="text-4xl mb-2">⚠️</div>
-      <h3 id="modal-title" class="font-titan text-xl text-amber-400 mb-2">Pemberitahuan</h3>
-      <p id="modal-body" class="text-sm text-slate-300 mb-6 leading-relaxed">Pesan modal...</p>
-      <div id="modal-actions" class="flex gap-3 justify-center">
-        <button id="modal-btn-confirm" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-titan text-sm shadow-lg glass-btn" onclick="tutupCustomModal()">OK</button>
-        <button id="modal-btn-cancel" class="hidden w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 font-titan text-sm shadow-lg glass-btn" onclick="tutupCustomModal()">BATAL</button>
-      </div>
-    </div>
-  </div>
-
   <!-- LOBBY MAIN MENU -->
-  <div id="main-menu" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-indigo-950 to-black">
-    <div class="glass-card rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border border-indigo-500/30">
+  <div id="main-menu" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-indigo-950 via-slate-900 to-black">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border border-amber-500/30">
       
-      <div class="font-titan text-2xl tracking-wider text-amber-400 drop-shadow-[0_2px_12px_rgba(245,158,11,0.5)] mb-1 flex items-center justify-center gap-2">
-        <span>⚔️</span> STICKMAN BATTLE <span>⚔️</span>
+      <div class="font-titan text-2xl tracking-wide text-amber-400 drop-shadow-[0_2px_10px_rgba(245,158,11,0.5)] mb-4 flex items-center justify-center gap-2">
+        <span>⚔️</span> TARIK TAMBANG <span>⚔️</span>
       </div>
-      <p class="text-[11px] text-cyan-400 font-bold mb-4 tracking-widest uppercase">Quiz Arena & Fatality HD (Mabar)</p>
 
-      <input type="number" id="room-code" placeholder="KODE ROOM (cth: 8888)" class="w-full py-3 px-4 rounded-xl bg-slate-900/90 border-2 border-indigo-500/80 text-white font-orbitron font-bold text-center text-lg outline-none focus:border-amber-400 transition-colors mb-3 placeholder-slate-500 shadow-inner">
+      <input type="number" id="room-code" placeholder="KODE ROOM (cth: 8888)" class="w-full py-3 px-4 rounded-xl bg-slate-900/80 border-2 border-indigo-500/80 text-white font-bold text-center text-lg outline-none focus:border-amber-400 transition-colors mb-3 placeholder-slate-500 shadow-inner">
       
-      <div class="flex gap-2 p-1.5 bg-slate-900/90 rounded-xl mb-3 border border-slate-700/60">
+      <!-- Role Selection -->
+      <div class="flex gap-2 p-1.5 bg-slate-900/90 rounded-xl mb-3 border border-slate-700/50">
         <button id="btn-role-player" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all bg-indigo-600 text-white shadow-md" onclick="pilihRole('player')">🎮 PEMAIN</button>
-        <button id="btn-role-juri" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white" onclick="pilihRole('juri')">👀 JURI / SPECTATOR</button>
+        <button id="btn-role-juri" class="flex-1 py-2 rounded-lg font-bold text-xs transition-all text-slate-400 hover:text-white" onclick="pilihRole('juri')">👀 JURI / PENONTON</button>
       </div>
 
+      <!-- Team Selection -->
       <div id="team-select-box" class="grid grid-cols-2 gap-3 mb-4">
-        <button id="btn-t1" class="py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5" onclick="pilihTim(1)">
-          <span class="text-base">🟦</span> BLUE FIGHTER
-        </button>
-        <button id="btn-t2" class="py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5" onclick="pilihTim(2)">
-          <span class="text-base">🟥</span> RED FIGHTER
-        </button>
+        <button id="btn-t1" class="py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 border-2 border-white scale-105" onclick="pilihTim(1)">NARUTO</button>
+        <button id="btn-t2" class="py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 opacity-50 hover:opacity-100 border-2 border-transparent" onclick="pilihTim(2)">SASUKE</button>
       </div>
 
-      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-base shadow-lg shadow-green-500/30 hover:brightness-110 glass-btn mb-3 tracking-wide" onclick="gabungRoom()">MULAI PERTARUNGAN 🚀</button>
+      <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-lg shadow-lg shadow-green-500/30 hover:brightness-110 glass-btn mb-3" onclick="gabungRoom()">MASUK ROOM 🚀</button>
       
       <div class="grid grid-cols-2 gap-2 mb-2">
-        <button class="py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
-        <button class="py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="bukaEditorSoal()">⚙️ Bank Soal</button>
+        <button class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="toggleFullScreen()">🖥️ Fullscreen</button>
+        <button class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="bukaEditorSoal()">⚙️ Bank Soal</button>
       </div>
 
+      <!-- SPECIAL RESET ROOM BUTTON (LOBBY) -->
       <button class="w-full py-2.5 mb-2 rounded-xl bg-red-950/80 hover:bg-red-900 border border-red-500/50 text-red-400 hover:text-red-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors glass-btn shadow-md" onclick="specialResetRoomLobby()">
-        💥 Reset Total Room
+        💥 Special Reset Room
       </button>
 
       <button class="w-full py-2.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors" onclick="bukaModalCaraMain()">📖 Panduan Bermain</button>
     </div>
   </div>
 
-  <!-- MODAL PANDUAN -->
+  <!-- MODAL CARA MAIN -->
   <div id="modal-guide" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="glass-card border-sky-500/40 rounded-3xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto text-left shadow-2xl">
-      <div class="font-titan text-sky-400 text-lg text-center mb-3 flex items-center justify-center gap-2">
-        <span>📖</span> PANDUAN BERTARUNG MABAR
+      <div class="font-titan text-sky-400 text-lg text-center mb-4 flex items-center justify-center gap-2">
+        <span>📖</span> CARA BERMAIN
       </div>
       
-      <div class="bg-slate-900/90 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
-        <h4 class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">🥊 Tujuan Utama Arena</h4>
-        <p class="text-slate-300 leading-relaxed">Habisi seluruh Darah (HP 100) Stickman lawan hingga K.O. atau miliki HP lebih tinggi saat timer habis!</p>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">🎯 Tujuan Utama Game</h4>
+        <p class="text-slate-300 leading-relaxed">Tarik tali tambang ke arah tim kamu hingga batas (15% / 85%) atau unggul saat timer habis!</p>
       </div>
 
-      <div class="bg-slate-900/90 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
-        <h4 class="text-amber-400 font-bold mb-1.5 flex items-center gap-1.5">⚡ Mekanisme Serangan & Fatality</h4>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-3 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1.5 flex items-center gap-1.5">🎮 Panduan Pemain</h4>
         <ul class="list-disc list-inside space-y-1 text-slate-300">
-          <li><span class="text-emerald-400 font-semibold">Jawaban BENAR:</span> Serangan normal (-8 HP).</li>
-          <li><span class="text-amber-400 font-semibold">🔥 Combo 3X - 6X:</span> Serangan Kritis (-12 s/d -15 HP)!</li>
-          <li><span class="text-purple-400 font-semibold">⚡ SUPER ULTIMATE:</span> Tembakan Laser Energi (-22 HP)!</li>
-          <li><span class="text-red-500 font-semibold">💀 FATALITY MODE:</span> Saat HP lawan ≤ 25, eksekusi lawan sampai K.O.!</li>
+          <li>Pilih <strong>PEMAIN</strong> lalu tentukan tim favorit.</li>
+          <li>Jawab soal secepat & setepat mungkin.</li>
+          <li><span class="text-emerald-400 font-semibold">Jawaban BENAR:</span> Menyerang lawan (+5%).</li>
+          <li><span class="text-red-400 font-semibold">Jawaban SALAH:</span> Ditarik mundur (-3%).</li>
+          <li><span class="text-amber-400 font-semibold">🔥 Combo 2X:</span> Jawab benar 2x berturut-turut untuk kekuatan ganda (+10%)!</li>
         </ul>
       </div>
 
-      <button class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-sm shadow-md glass-btn" onclick="tutupModalCaraMain()">SIAP BERTARUNG! ⚔️</button>
+      <div class="bg-slate-900/80 rounded-2xl p-3.5 mb-4 border border-slate-700/60 text-xs">
+        <h4 class="text-amber-400 font-bold mb-1 flex items-center gap-1.5">👀 Panduan Juri / Host</h4>
+        <p class="text-slate-300 leading-relaxed">Pilih mode JURI untuk menampilkan papan skor arena secara live di layar utama / Zoom / Meet.</p>
+      </div>
+
+      <button class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-sm shadow-md glass-btn" onclick="tutupModalCaraMain()">PAHAM & TUTUP 🚀</button>
     </div>
   </div>
 
-  <!-- EDITOR BANK SOAL -->
+  <!-- MODAL EDITOR BANK SOAL -->
   <div id="modal-editor" class="fixed inset-0 z-50 bg-slate-950/95 hidden flex-col">
     <div class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
       <div class="font-bold text-lg text-indigo-400 flex items-center gap-2">⚙️ Bank Soal Editor</div>
@@ -228,792 +198,173 @@
           <input type="file" id="input-csv" accept=".csv" class="hidden" onchange="bacaFileCSV(event)">
         </label>
         <button class="px-4 py-2 rounded-xl bg-red-600/80 hover:bg-red-600 text-xs font-bold transition-colors" onclick="resetSemuaSoal()">🗑 Reset All</button>
-        <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold transition-colors ml-auto shadow-md shadow-emerald-600/20" onclick="simpanKeDatabase()">💾 Simpan Memori</button>
+        <button class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold transition-colors ml-auto shadow-md shadow-emerald-600/20" onclick="simpanKeDatabase()">💾 Simpan Database</button>
       </div>
       
       <div id="list-soal-container" class="space-y-3"></div>
     </div>
   </div>
 
-  <!-- GAME ARENA SCREEN -->
-  <div id="game-container" class="hidden flex-col h-dvh w-screen bg-slate-950 justify-between p-3 select-none">
+  <!-- GAME ARENA MAIN -->
+  <div id="game-container" class="hidden flex-col h-dvh w-screen bg-gradient-to-b from-sky-900 via-slate-900 to-slate-950 justify-between p-3 select-none">
     
-    <!-- TOP HUD -->
-    <div class="glass-card rounded-2xl p-3 px-4 border border-white/10 shadow-xl flex flex-col gap-2">
-      <div class="flex justify-between items-center text-xs font-bold text-slate-300">
-        <div class="flex items-center gap-2">
-          <span>Room: <strong id="lbl-room" class="text-white font-orbitron">-</strong></span>
-          <span class="text-slate-600">|</span>
-          <span id="lbl-tim" class="text-cyan-400 font-titan">BLUE FIGHTER</span>
-          <span id="combo-badge" class="hidden bg-amber-500 text-slate-950 font-titan text-[10px] px-2 py-0.5 rounded-full animate-bounce">🔥 2X CRITICAL!</span>
+    <!-- Top Bar -->
+    <div class="glass-card rounded-2xl p-2.5 px-4 flex justify-between items-center border border-white/10 shadow-lg">
+      <div class="text-xs font-bold text-sky-200 flex items-center gap-2">
+        <span>Room: <strong id="lbl-room" class="text-white">-</strong></span>
+        <span class="text-slate-500">|</span>
+        <span id="lbl-tim" class="text-blue-400">NARUTO</span>
+        <span id="combo-badge" class="hidden bg-amber-500 text-slate-950 font-titan text-[10px] px-2 py-0.5 rounded-full animate-bounce">🔥 2X COMBO!</span>
+      </div>
+      <div id="waktu" class="font-titan text-red-400 bg-red-950/80 border border-red-500/50 px-3 py-1 rounded-xl text-sm tracking-wider shadow-inner">10:00</div>
+      <button class="bg-red-600/80 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-xs font-bold glass-btn" onclick="keluarGame()">Exit</button>
+    </div>
+
+    <!-- Stadium Arena -->
+    <div id="arena-stadium" class="relative my-2 h-32 rounded-2xl bg-gradient-to-b from-emerald-700 to-green-900 border-4 border-amber-400 flex items-center overflow-hidden shadow-[inset_0_4px_12px_rgba(0,0,0,0.6)]">
+      <div class="absolute left-1/2 -translate-x-1/2 w-1.5 h-full bg-white/80 border-r-2 border-dashed border-black/50 z-10"></div>
+      
+      <div id="rope-group" class="absolute left-1/2 -translate-x-1/2 w-64 h-full flex items-center justify-between transition-all duration-300 ease-out z-20">
+        <!-- Naruto Avatar -->
+        <div id="avatar-naruto" class="w-14 h-14 rounded-full border-2 border-amber-400 bg-slate-900 overflow-hidden shadow-md relative transition-transform">
+          <img src="https://img.icons8.com/color/144/naruto.png" alt="Naruto" class="w-full h-full object-cover">
         </div>
         
-        <div class="flex items-center gap-1.5">
-          <button id="btn-toggle-bgm" class="bg-indigo-900/80 hover:bg-indigo-700 text-amber-300 border border-indigo-500/50 rounded-lg px-2.5 py-1 text-[11px] font-bold glass-btn flex items-center gap-1" onclick="toggleBGM()">
-            <span>🎵</span> <span id="txt-bgm-status">Musik: ON</span>
-          </button>
-          <button id="btn-toggle-voice" class="bg-indigo-900/80 hover:bg-indigo-700 text-cyan-300 border border-indigo-500/50 rounded-lg px-2.5 py-1 text-[11px] font-bold glass-btn flex items-center gap-1" onclick="toggleVoiceAnnouncer()">
-            <span>🎙️</span> <span id="txt-voice-status">Suara: ON</span>
-          </button>
-          <button class="bg-red-600/80 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-xs font-bold glass-btn ml-1" onclick="keluarGame()">Exit</button>
-        </div>
-      </div>
-
-      <!-- HEALTH BARS -->
-      <div class="grid grid-cols-12 gap-2 items-center">
-        <!-- P1 HP -->
-        <div class="col-span-5 flex flex-col gap-1">
-          <div class="flex justify-between items-center text-[11px] font-bold">
-            <span class="text-cyan-400 font-titan tracking-wide">P1: BLUE</span>
-            <span id="hp-text-1" class="font-orbitron text-cyan-300">100 / 100</span>
-          </div>
-          <div class="w-full h-3.5 bg-slate-900 border border-slate-700 rounded-lg overflow-hidden relative">
-            <div id="hp-bar-1" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 w-full transition-all duration-300 hp-pulse-cyan"></div>
-          </div>
-          <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-cyan-500/30">
-            <div id="energy-bar-1" class="h-full bg-gradient-to-r from-amber-400 to-yellow-300 w-0 transition-all duration-300"></div>
-          </div>
-          <div id="danger-badge-1" class="hidden text-[10px] font-orbitron font-black text-red-500 tracking-wider animate-pulse">⚠️ CRITICAL HEALTH</div>
+        <!-- Rope & Ribbon -->
+        <div class="relative flex-1 h-2 bg-amber-700 border border-amber-950 rounded-full mx-1">
+          <div class="absolute left-1/2 -top-2.5 -translate-x-1/2 w-3.5 h-7 bg-red-500 border-2 border-white rounded-sm shadow-md"></div>
         </div>
 
-        <!-- TIMER -->
-        <div class="col-span-2 flex flex-col items-center justify-center">
-          <div id="waktu" class="font-orbitron font-extrabold text-amber-400 bg-slate-900/90 border border-amber-500/50 px-3 py-1 rounded-xl text-sm md:text-base shadow-[0_0_15px_rgba(245,158,11,0.3)] tracking-wider">10:00</div>
-        </div>
-
-        <!-- P2 HP -->
-        <div class="col-span-5 flex flex-col gap-1">
-          <div class="flex justify-between items-center text-[11px] font-bold">
-            <span id="hp-text-2" class="font-orbitron text-rose-300">100 / 100</span>
-            <span class="text-rose-400 font-titan tracking-wide">P2: RED</span>
-          </div>
-          <div class="w-full h-3.5 bg-slate-900 border border-slate-700 rounded-lg overflow-hidden relative">
-            <div id="hp-bar-2" class="h-full bg-gradient-to-l from-rose-500 to-red-600 w-full transition-all duration-300 hp-pulse-red"></div>
-          </div>
-          <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-rose-500/30">
-            <div id="energy-bar-2" class="h-full bg-gradient-to-r from-amber-400 to-yellow-300 w-0 transition-all duration-300"></div>
-          </div>
-          <div id="danger-badge-2" class="hidden text-[10px] font-orbitron font-black text-red-500 tracking-wider animate-pulse text-right">⚠️ CRITICAL HEALTH</div>
+        <!-- Sasuke Avatar -->
+        <div id="avatar-sasuke" class="w-14 h-14 rounded-full border-2 border-amber-400 bg-slate-900 overflow-hidden shadow-md relative transition-transform">
+          <img src="https://img.icons8.com/color/144/sasuke-uchiha.png" alt="Sasuke" class="w-full h-full object-cover -scale-x-100">
         </div>
       </div>
     </div>
 
-    <!-- CANVAS ARENA -->
-    <div id="arena-stadium" class="relative my-2 flex-1 rounded-2xl arena-modern-bg border-2 border-indigo-900/40 flex items-center justify-center overflow-hidden min-h-[180px]">
-      <div id="commentary-ticker-container" class="absolute top-3 inset-x-3 z-20 pointer-events-none flex justify-center">
-        <div class="commentary-ticker-box px-4 py-2 rounded-2xl flex items-center gap-2.5 text-xs md:text-sm font-bold shadow-2xl backdrop-blur-md border border-amber-400/60 max-w-[95%]">
-          <span class="text-amber-400 text-lg animate-bounce flex-shrink-0">🎙️</span>
-          <span id="commentary-ticker-text" class="text-amber-300 font-titan tracking-wide line-clamp-1 drop-shadow-md">KOMENTATOR ARENA: Pertarungan sengit dimulai! Bersiaplah para pejuang sejati!</span>
-        </div>
-      </div>
-
-      <canvas id="stickman-canvas" class="w-full h-full block"></canvas>
-    </div>
-
-    <!-- PANEL SPECTATOR -->
+    <!-- Mode Spectator / Juri Panel -->
     <div id="spectator-panel" class="hidden flex-1 glass-card border-amber-400/40 rounded-2xl p-4 flex-col justify-center items-center text-center gap-3 my-2">
-      <div class="font-titan text-amber-400 text-lg">📺 SPECTATOR ARENA LIVE</div>
+      <div class="font-titan text-amber-400 text-lg">📺 SPECTATOR ARENA</div>
       <div class="w-full max-w-xs space-y-2">
-        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700 text-xs font-bold flex justify-between">
-          <span>HP P1 (BLUE): <strong id="spec-hp-1" class="text-cyan-400 font-orbitron">100</strong></span>
-          <span>HP P2 (RED): <strong id="spec-hp-2" class="text-rose-400 font-orbitron">100</strong></span>
-        </div>
-        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-700 text-xs font-bold">STATUS: <span id="lbl-status-unggul" class="text-amber-400">PERTARUNGAN SEIMBANG</span></div>
+        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 text-sm font-bold">POSISI TALI: <span id="lbl-posisi-tali" class="text-amber-400">50%</span></div>
+        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700 text-sm font-bold">STATUS: <span id="lbl-status-unggul" class="text-sky-400">SEIMBANG</span></div>
       </div>
       
-      <div class="text-xs text-slate-400 mt-1">KIRIM REAKSI LIVE:</div>
+      <div class="text-xs text-slate-400 mt-2">KIRIM REAKSI LIVE:</div>
       <div class="flex gap-2">
         <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('👏')">👏</button>
         <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('🔥')">🔥</button>
-        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('🩸')">🩸</button>
-        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('💥')">💥</button>
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('🎉')">🎉</button>
+        <button class="bg-slate-800 hover:bg-slate-700 text-xl p-2.5 rounded-xl border border-slate-600 glass-btn" onclick="kirimReaksi('💣')">💣</button>
       </div>
 
       <div class="flex gap-2 mt-2 w-full max-w-xs">
-        <button class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-titan text-xs shadow-md glass-btn" onclick="resetMatchHP()">🔄 Reset HP</button>
+        <button class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-titan text-xs shadow-md glass-btn" onclick="resetMatchTali()">🔄 Reset Tali</button>
         <button class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-titan text-xs shadow-md glass-btn" onclick="specialResetRoomInGame()">💥 Special Reset</button>
       </div>
     </div>
 
-    <!-- CARD SOAL -->
-    <div id="card-soal-box" class="glass-card rounded-2xl p-4 text-center my-1.5 flex flex-col items-center justify-center border-indigo-500/30 shadow-xl min-h-[85px]">
-      <p id="teks-soal" class="text-white text-sm md:text-base font-bold leading-relaxed">Memuat Pertanyaan...</p>
+    <!-- Question Card -->
+    <div id="card-soal-box" class="glass-card rounded-2xl p-4 text-center my-2 flex-1 flex items-center justify-center border-indigo-500/30 shadow-xl">
+      <p id="teks-soal" class="text-white text-base md:text-lg font-bold leading-relaxed">Memuat Pertanyaan...</p>
     </div>
 
-    <!-- OPSI JAWABAN -->
-    <div id="grid-jawaban-box" class="grid grid-cols-2 gap-2 h-36">
-      <button class="btn-ans glass-btn bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 rounded-xl p-2.5 text-xs md:text-sm font-bold flex items-center gap-2 text-left shadow-lg" onclick="jawab(0)">
-        <span class="font-titan bg-cyan-600/40 border border-cyan-400/50 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 text-cyan-300">A</span>
-        <span id="opt0" class="line-clamp-2 text-slate-200">-</span>
+    <!-- Answer Options Grid -->
+    <div id="grid-jawaban-box" class="grid grid-cols-2 gap-2.5 h-40">
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(0)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">A</span>
+        <span id="opt0" class="line-clamp-2">-</span>
       </button>
-      <button class="btn-ans glass-btn bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 rounded-xl p-2.5 text-xs md:text-sm font-bold flex items-center gap-2 text-left shadow-lg" onclick="jawab(1)">
-        <span class="font-titan bg-cyan-600/40 border border-cyan-400/50 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 text-cyan-300">B</span>
-        <span id="opt1" class="line-clamp-2 text-slate-200">-</span>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(1)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">B</span>
+        <span id="opt1" class="line-clamp-2">-</span>
       </button>
-      <button class="btn-ans glass-btn bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 rounded-xl p-2.5 text-xs md:text-sm font-bold flex items-center gap-2 text-left shadow-lg" onclick="jawab(2)">
-        <span class="font-titan bg-cyan-600/40 border border-cyan-400/50 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 text-cyan-300">C</span>
-        <span id="opt2" class="line-clamp-2 text-slate-200">-</span>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(2)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">C</span>
+        <span id="opt2" class="line-clamp-2">-</span>
       </button>
-      <button class="btn-ans glass-btn bg-gradient-to-b from-slate-800 to-slate-900 border-2 border-slate-700 rounded-xl p-2.5 text-xs md:text-sm font-bold flex items-center gap-2 text-left shadow-lg" onclick="jawab(3)">
-        <span class="font-titan bg-cyan-600/40 border border-cyan-400/50 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 text-cyan-300">D</span>
-        <span id="opt3" class="line-clamp-2 text-slate-200">-</span>
+      <button class="btn-ans glass-btn bg-gradient-to-b from-blue-600 to-blue-800 border-2 border-blue-400/50 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg" onclick="jawab(3)">
+        <span class="font-titan bg-black/30 w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0">D</span>
+        <span id="opt3" class="line-clamp-2">-</span>
       </button>
     </div>
   </div>
 
-  <!-- HASIL WINNER -->
+  <!-- OVERLAY HASIL -->
   <div id="overlay-menang" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="glass-card border-amber-400/50 rounded-3xl p-6 text-center w-full max-w-sm shadow-2xl">
-      <div class="font-orbitron font-extrabold text-red-500 text-3xl tracking-widest mb-1">K. O.</div>
-      <div id="teks-menang" class="font-titan text-lg text-amber-400 mb-3 drop-shadow-md">PETARUNG BIRU MENANG!</div>
-      
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <div class="bg-emerald-950/80 border border-emerald-500/60 p-2.5 rounded-2xl text-center shadow-md">
-          <div class="text-[10px] font-bold text-emerald-400 tracking-wider uppercase flex items-center justify-center gap-1">👑 PEMENANG</div>
-          <div id="winner-name-badge" class="font-titan text-xs text-emerald-300 mt-1">BLUE FIGHTER 🟦</div>
-        </div>
-        <div class="bg-red-950/80 border border-red-500/60 p-2.5 rounded-2xl text-center shadow-md">
-          <div class="text-[10px] font-bold text-red-400 tracking-wider uppercase flex items-center justify-center gap-1">💀 YANG KALAH</div>
-          <div id="loser-name-badge" class="font-titan text-xs text-red-300 mt-1">RED FIGHTER 🟥 (K.O.)</div>
-        </div>
-      </div>
-
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-5 text-xs text-slate-300 space-y-1.5 text-left font-semibold">
-        <div class="text-amber-400 font-titan text-center mb-1 text-xs">📊 STATISTIK PERTANDINGAN</div>
-        <div class="flex justify-between"><span>Total Jawaban Benar:</span> <strong id="stat-benar" class="text-emerald-400 font-orbitron">0</strong></div>
-        <div class="flex justify-between"><span>Max Combo Streak:</span> <strong id="stat-combo" class="text-amber-400 font-orbitron">0X</strong></div>
-        <div class="flex justify-between"><span>Akurasi Serangan:</span> <strong id="stat-akurasi" class="text-cyan-400 font-orbitron">100%</strong></div>
-      </div>
-
+    <div class="glass-card border-amber-400/50 rounded-3xl p-6 text-center w-full max-w-xs shadow-2xl">
+      <div id="teks-menang" class="font-titan text-xl text-amber-400 mb-6 drop-shadow-md">TIM NARUTO MENANG!</div>
       <button class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 font-titan text-sm shadow-lg glass-btn" onclick="keluarGame()">KEMBALI KE LOBBY 🏠</button>
     </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('stickman-canvas');
-    const ctx = canvas.getContext('2d');
+    /* Web Audio Synthesizer */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSFX(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
 
-    function resizeCanvas() {
-      const container = document.getElementById('arena-stadium');
-      if (container && canvas) {
-        const dpr = window.devicePixelRatio || 1;
-        const rect = container.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct' || type === 'punch') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(); osc.stop(now + 0.15);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(); osc.stop(now + 0.2);
+      } else if (type === 'cheer') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(); osc.stop(now + 0.15);
+      } else if (type === 'win') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.15);
+        osc.frequency.setValueAtTime(783.99, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+        osc.start(); osc.stop(now + 0.6);
       }
     }
-    window.addEventListener('resize', resizeCanvas);
 
-    let p1State = { hp: 100, animState: 'idle' };
-    let p2State = { hp: 100, animState: 'idle' };
+    /* Firebase Config */
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6qWcP-732y2gdeUpVAuc50wEzRUYvZog",
+      authDomain: "tarik-tambang-all-in.firebaseapp.com",
+      databaseURL: "https://tarik-tambang-all-in-default-rtdb.firebaseio.com",
+      projectId: "tarik-tambang-all-in",
+      storageBucket: "tarik-tambang-all-in.firebasestorage.app",
+      messagingSenderId: "926072529297",
+      appId: "1:926072529297:web:b5b867cbb7072c91723a30"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    /* Global State */
+    let bankSoal = [];
+    let roomID = "";
     let timSaya = 1;
     let roleSaya = 'player';
-    let roomID = '';
     let roomRef = null;
+    let idxSoal = 0;
     let timerInterval = null;
     let comboCount = 0;
-    let maxComboCount = 0;
-    let totalBenarCount = 0;
-    let totalJawabCount = 0;
-    let energyGauge = 0;
-    let idxSoal = 0;
-    let finishHimTriggered = false;
-    let isFatalityActive = false;
-    let fatalityName = '';
-    const fatalityNamesList = [
-      '⚡ THUNDER GOD SLICE ⚡', 
-      '🔥 FIRE DRAGON EXECUTION 🔥', 
-      '⚔️ LIGHTNING BLADE FATALITY ⚔️', 
-      '🌌 DARK COSMIC DISINTEGRATION 🌌', 
-      '💥 HYPER KINETIC KO 💥'
-    ];
-    let bloodParticles = [];
-    let damageNumbers = [];
-    let lastHitTimestamp = 0;
-    let customModalCallback = null;
-    let gameStartTime = 0;
-
-    let bankSoal = [
-      { soal: "Berapakah hasil dari 15 x 12?", opsi: ["170", "180", "190", "200"], jawaban: 1 },
-      { soal: "Apa ibu kota negara Indonesia?", opsi: ["Bandung", "Surabaya", "Jakarta", "Medan"], jawaban: 2 },
-      { soal: "Unsur kimia dengan lambang 'O' adalah...", opsi: ["Emas", "Oksigen", "Osmium", "Perak"], jawaban: 1 },
-      { soal: "Planet terbesar dalam tata surya kita adalah...", opsi: ["Mars", "Saturnus", "Jupiter", "Neptunus"], jawaban: 2 },
-      { soal: "Siapa penemu bola lampu pijar?", opsi: ["Nikola Tesla", "Thomas Edison", "Albert Einstein", "Alexander Graham Bell"], jawaban: 1 }
-    ];
-
-    let db;
-    let isLocalFallback = false;
-
-    // Inisialisasi Database dengan Fallback Robust
-    try {
-      if (typeof firebase !== 'undefined' && firebase.apps) {
-        if (!firebase.apps.length) {
-          firebase.initializeApp({
-            databaseURL: "https://stickman-quiz-default-rtdb.firebaseio.com"
-          });
-        }
-        db = firebase.database();
-      } else {
-        throw new Error("SDK Firebase tidak dimuat");
-      }
-    } catch(e) {
-      isLocalFallback = true;
-      const localRooms = {};
-      const localListeners = {};
-      
-      db = {
-        ref: function(path) {
-          if (!localRooms[path]) {
-            localRooms[path] = { hp1: 100, hp2: 100, startTime: Date.now(), duration: 600, reaction: '', hitEvent: null, isGameOver: false };
-          }
-          if (!localListeners[path]) localListeners[path] = [];
-
-          const triggerUpdate = () => {
-            const snap = { val: () => JSON.parse(JSON.stringify(localRooms[path])) };
-            localListeners[path].forEach(cb => cb(snap));
-            if (window.BroadcastChannel) {
-              try { new BroadcastChannel('stickman_mabar').postMessage({ path, data: localRooms[path] }); } catch(err){}
-            }
-          };
-
-          return {
-            get: () => Promise.resolve({ exists: () => true, val: () => localRooms[path] }),
-            set: (val) => { localRooms[path] = val; triggerUpdate(); return Promise.resolve(); },
-            update: (val) => { Object.assign(localRooms[path], val); triggerUpdate(); return Promise.resolve(); },
-            remove: () => { delete localRooms[path]; triggerUpdate(); return Promise.resolve(); },
-            on: (evt, cb) => { if (!localListeners[path].includes(cb)) localListeners[path].push(cb); cb({ val: () => localRooms[path] }); },
-            off: () => { localListeners[path] = []; },
-            child: (childPath) => ({
-              set: (val) => { localRooms[path][childPath] = val; triggerUpdate(); return Promise.resolve(); },
-              transaction: (updateFn) => {
-                const cur = localRooms[path][childPath];
-                const res = updateFn(cur);
-                localRooms[path][childPath] = res;
-                triggerUpdate();
-                return Promise.resolve();
-              }
-            })
-          };
-        }
-      };
-
-      if (window.BroadcastChannel) {
-        const bc = new BroadcastChannel('stickman_mabar');
-        bc.onmessage = (msg) => {
-          if (msg.data && msg.data.path && localListeners[msg.data.path]) {
-            localRooms[msg.data.path] = msg.data.data;
-            const snap = { val: () => msg.data.data };
-            localListeners[msg.data.path].forEach(cb => cb(snap));
-          }
-        };
-      }
-    }
-
-    // Sound Synthesizer
-    let audioCtx = null;
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    let isBGMEnabled = true;
-    let isVoiceEnabled = true;
-    let bgmInterval = null;
-    let bgmStep = 0;
-    let bgmTempoMs = 220;
-    let lastCommentaryTime = 0;
-
-    function playSFX(type) {
-      try {
-        initAudio();
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        if (type === 'punch') {
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(160, now);
-          osc.frequency.exponentialRampToValueAtTime(30, now + 0.12);
-          gain.gain.setValueAtTime(0.7, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-          osc.start(now); osc.stop(now + 0.12);
-        } else if (type === 'crit') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(350, now);
-          osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
-          gain.gain.setValueAtTime(0.8, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-          osc.start(now); osc.stop(now + 0.25);
-        } else if (type === 'ultimate') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(600, now);
-          osc.frequency.linearRampToValueAtTime(120, now + 0.5);
-          gain.gain.setValueAtTime(0.9, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-          osc.start(now); osc.stop(now + 0.5);
-        } else if (type === 'fatality') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(100, now);
-          osc.frequency.linearRampToValueAtTime(40, now + 0.8);
-          gain.gain.setValueAtTime(1.0, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
-          osc.start(now); osc.stop(now + 0.8);
-        } else if (type === 'wrong') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(130, now);
-          osc.frequency.setValueAtTime(90, now + 0.15);
-          gain.gain.setValueAtTime(0.5, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-          osc.start(now); osc.stop(now + 0.3);
-        } else if (type === 'win') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(440, now);
-          osc.frequency.setValueAtTime(554, now + 0.1);
-          osc.frequency.setValueAtTime(659, now + 0.2);
-          gain.gain.setValueAtTime(0.6, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-          osc.start(now); osc.stop(now + 0.4);
-        }
-      } catch(e) {}
-    }
-
-    function startBGM() {
-      if (!isBGMEnabled || bgmInterval) return;
-      const notes = [110, 110, 130, 110, 146, 110, 130, 98];
-      bgmInterval = setInterval(() => {
-        try {
-          initAudio();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.value = notes[bgmStep % notes.length];
-          gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(); osc.stop(audioCtx.currentTime + 0.18);
-          bgmStep++;
-        } catch(e) {}
-      }, bgmTempoMs);
-    }
-
-    function stopBGM() {
-      if (bgmInterval) {
-        clearInterval(bgmInterval);
-        bgmInterval = null;
-      }
-    }
-
-    function toggleBGM() {
-      isBGMEnabled = !isBGMEnabled;
-      document.getElementById('txt-bgm-status').innerText = isBGMEnabled ? "Musik: ON" : "Musik: OFF";
-      if (isBGMEnabled) startBGM();
-      else stopBGM();
-    }
-
-    function toggleVoiceAnnouncer() {
-      isVoiceEnabled = !isVoiceEnabled;
-      document.getElementById('txt-voice-status').innerText = isVoiceEnabled ? "Suara: ON" : "Suara: OFF";
-    }
-
-    function spawnBlood(x, y, count) {
-      for (let i = 0; i < count; i++) {
-        bloodParticles.push({
-          x: x, y: y,
-          vx: (Math.random() - 0.5) * 12,
-          vy: (Math.random() - 0.7) * 10,
-          radius: Math.random() * 4 + 2,
-          color: Math.random() > 0.3 ? '#dc2626' : '#991b1b',
-          life: 1.0
-        });
-      }
-    }
-
-    function spawnDamageText(x, y, text, isCrit, isUltimate, isFatality) {
-      damageNumbers.push({
-        x: x, y: y, vy: -2,
-        text: text, isCrit: isCrit, isUltimate: isUltimate, isFatality: isFatality,
-        life: 1.0
-      });
-    }
-
-    function tampilkanCustomModal(title, body, icon = "⚠️", showCancel = false, onConfirm = null) {
-      document.getElementById('modal-title').innerText = title;
-      document.getElementById('modal-body').innerText = body;
-      document.getElementById('modal-icon').innerText = icon;
-      
-      const btnCancel = document.getElementById('modal-btn-cancel');
-      if (showCancel) btnCancel.classList.remove('hidden');
-      else btnCancel.classList.add('hidden');
-
-      customModalCallback = onConfirm;
-      const modal = document.getElementById('custom-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function tutupCustomModal() {
-      const modal = document.getElementById('custom-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      if (customModalCallback) {
-        customModalCallback();
-        customModalCallback = null;
-      }
-    }
-
-    let idVoice = null;
-    function loadVoices() {
-      if ('speechSynthesis' in window) {
-        const voices = window.speechSynthesis.getVoices();
-        idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID')) || voices[0];
-      }
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-      loadVoices();
-    }
-
-    function sanitizeTextForSpeech(teks) {
-      if (!teks) return "";
-      let clean = teks;
-      clean = clean.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
-      clean = clean.replace(/\bHP\b/gi, 'darah');
-      clean = clean.replace(/\bP1\b/gi, 'Petarung Biru');
-      clean = clean.replace(/\bP2\b/gi, 'Petarung Merah');
-      clean = clean.replace(/Blue Fighter/gi, 'Petarung Biru');
-      clean = clean.replace(/Red Fighter/gi, 'Petarung Merah');
-      clean = clean.replace(/\bK\.?O\.?\b/gi, 'Tumbang Total');
-      clean = clean.replace(/\bFATALITY!\b/gi, 'Fataliti!');
-      clean = clean.replace(/\bFINISH HIM!\b/gi, 'Habisi Dia!');
-      clean = clean.replace(/\bSUPER ULTIMATE\b/gi, 'Super Ultimet');
-      clean = clean.replace(/(\d+)X/gi, '$1 kali');
-      clean = clean.replace(/VS/gi, 'versus');
-      clean = clean.replace(/!+/g, '. ');
-      return clean.trim();
-    }
-
-    function sampaikanKomentar(teks, priority = false) {
-      const bannerEl = document.getElementById('commentary-ticker-text');
-      if (bannerEl) bannerEl.innerText = "KOMENTATOR: " + teks;
-
-      const now = Date.now();
-      if (!isVoiceEnabled || (!priority && now - lastCommentaryTime < 2800)) return;
-      lastCommentaryTime = now;
-
-      if ('speechSynthesis' in window) {
-        try {
-          window.speechSynthesis.cancel();
-          const spokenText = sanitizeTextForSpeech(teks);
-          const utterance = new SpeechSynthesisUtterance(spokenText);
-          utterance.lang = 'id-ID';
-          utterance.rate = 1.22;
-          utterance.pitch = 1.08;
-          if (idVoice) utterance.voice = idVoice;
-          window.speechSynthesis.speak(utterance);
-        } catch(e) {}
-      }
-    }
-
-    function triggerStickmanAttack(attacker, damage, isCrit, isUltimate, isFatality = false) {
-      const attackerName = attacker === 1 ? "Petarung Biru" : "Petarung Merah";
-      const victimName = attacker === 1 ? "Petarung Merah" : "Petarung Biru";
-
-      if (isFatality) {
-        playSFX('fatality');
-        isFatalityActive = true;
-        fatalityName = fatalityNamesList[Math.floor(Math.random() * fatalityNamesList.length)];
-        
-        const loserName = attacker === 1 ? "RED FIGHTER 🟥" : "BLUE FIGHTER 🟦";
-        document.getElementById('fatality-move-name').innerText = fatalityName;
-        document.getElementById('fatality-loser-text').innerText = `💀 ${loserName} TER-EKSEKUSI TOTAL! 💀`;
-        document.getElementById('banner-fatality').classList.remove('hidden');
-        document.getElementById('banner-fatality').classList.add('flex');
-
-        sampaikanKomentar(`FATALITI! ${attackerName} mengeksekusi ${victimName} dengan jurus mematikan!`, true);
-
-        setTimeout(() => {
-          document.getElementById('banner-fatality').classList.add('hidden');
-          document.getElementById('banner-fatality').classList.remove('flex');
-          isFatalityActive = false;
-        }, 2800);
-      } else if (isUltimate) {
-        playSFX('ultimate');
-        sampaikanKomentar(`Tembakan Laser Super Ultimet ${attackerName} meledakkan arena!`, true);
-      } else {
-        playSFX(isCrit ? 'crit' : 'punch');
-        if (isCrit) {
-          sampaikanKomentar(`DUARRR! Serangan kritis dahsyat dari ${attackerName} menghantam telak!`);
-        } else {
-          sampaikanKomentar(`Pukulan presisi dari ${attackerName}!`);
-        }
-      }
-
-      const stadium = document.getElementById('arena-stadium');
-      stadium.classList.remove('stadium-shake');
-      void stadium.offsetWidth;
-      stadium.classList.add('stadium-shake');
-
-      const logicalWidth = canvas.clientWidth || (canvas.width / (window.devicePixelRatio || 1));
-      const logicalHeight = canvas.clientHeight || (canvas.height / (window.devicePixelRatio || 1));
-      const groundY = logicalHeight * 0.76;
-      const targetX = attacker === 1 ? logicalWidth * 0.7 : logicalWidth * 0.3;
-
-      if (attacker === 1) {
-        p1State.animState = (isFatality || isUltimate) ? 'ultimate' : 'punch';
-        p2State.animState = isFatality ? 'ko' : 'hurt';
-      } else {
-        p2State.animState = (isFatality || isUltimate) ? 'ultimate' : 'punch';
-        p1State.animState = isFatality ? 'ko' : 'hurt';
-      }
-
-      spawnBlood(targetX, groundY - 50, isFatality ? 80 : (isUltimate ? 50 : 25));
-      spawnDamageText(
-        targetX - 20, groundY - 80, 
-        isFatality ? '💀 FATALITY!' : `-${damage} HP${isUltimate ? ' 🔥 ULTIMATE!' : (isCrit ? ' 💥 CRITICAL!' : '')}`, 
-        isCrit, isUltimate, isFatality
-      );
-
-      setTimeout(() => {
-        if (p1State.hp > 0 && !isFatality) p1State.animState = 'idle';
-        if (p2State.hp > 0 && !isFatality) p2State.animState = 'idle';
-      }, 450);
-    }
-
-    function triggerFinishHimBanner() {
-      if (finishHimTriggered) return;
-      finishHimTriggered = true;
-      playSFX('finish_him');
-      bgmTempoMs = 140;
-      if (bgmInterval) { stopBGM(); startBGM(); }
-      sampaikanKomentar("HABISI DIA! Darah lawan sudah sangat kritis! Eksekusi sekarang!", true);
-
-      const banner = document.getElementById('banner-finish-him');
-      banner.classList.remove('hidden');
-      banner.classList.add('flex');
-
-      setTimeout(() => {
-        banner.classList.add('hidden');
-        banner.classList.remove('flex');
-      }, 1800);
-    }
-
-    function drawStickman(x, y, color, state, dir, streakCount = 0) {
-      ctx.save();
-      ctx.translate(x, y);
-
-      if (streakCount >= 3 && state.animState !== 'ko') {
-        const auraColor = streakCount >= 6 ? 'rgba(245, 158, 11, ' : 'rgba(6, 182, 212, ';
-        const pulse = Math.sin(Date.now() / 100) * 6 + 18;
-        ctx.beginPath();
-        ctx.arc(0, -45, pulse + 12, 0, Math.PI * 2);
-        ctx.fillStyle = auraColor + '0.25)';
-        ctx.fill();
-        ctx.strokeStyle = auraColor + '0.6)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 14;
-      ctx.lineWidth = 4.5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      if (state.animState === 'ko') {
-        ctx.fillStyle = 'rgba(185, 28, 28, 0.8)';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 50, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        const headX = -35 * dir;
-        const headY = -12;
-        
-        ctx.beginPath();
-        ctx.arc(headX, headY, 12, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(headX - 4, headY - 4); ctx.lineTo(headX + 4, headY + 4);
-        ctx.moveTo(headX + 4, headY - 4); ctx.lineTo(headX - 4, headY + 4);
-        ctx.stroke();
-
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 4.5;
-        ctx.beginPath();
-        ctx.moveTo(headX + (12 * dir), headY); ctx.lineTo(15 * dir, headY);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(headX + (20 * dir), headY); ctx.lineTo(headX + (10 * dir), headY - 10);
-        ctx.moveTo(headX + (20 * dir), headY); ctx.lineTo(headX + (30 * dir), headY - 6);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(15 * dir, headY); ctx.lineTo(35 * dir, headY);
-        ctx.moveTo(15 * dir, headY); ctx.lineTo(40 * dir, headY - 8);
-        ctx.stroke();
-
-        ctx.font = "900 15px Titan One";
-        ctx.fillStyle = "#ef4444";
-        ctx.shadowColor = "#000000";
-        ctx.shadowBlur = 10;
-        ctx.textAlign = "center";
-        ctx.fillText("💀 DEFEATED / K.O.", 0, -35);
-        ctx.shadowBlur = 0;
-
-        ctx.restore();
-        return;
-      }
-
-      let headY = -70;
-      let bodyX = 0;
-      let rArmX = 16 * dir, rArmY = -42;
-      let lArmX = -16 * dir, lArmY = -42;
-      let rLegX = 16 * dir, rLegY = 0;
-      let lLegX = -16 * dir, lLegY = 0;
-
-      const bounce = Math.sin(Date.now() / 180) * 3;
-      headY += bounce;
-
-      if (state.animState === 'punch') {
-        rArmX = 42 * dir; rArmY = -54; bodyX = 14 * dir;
-      } else if (state.animState === 'ultimate') {
-        rArmX = 52 * dir; rArmY = -48; lArmX = 46 * dir; lArmY = -40; bodyX = 20 * dir;
-      } else if (state.animState === 'hurt') {
-        bodyX = -18 * dir; headY = -62; rArmX = -26 * dir; lArmX = -32 * dir;
-      }
-
-      ctx.beginPath();
-      ctx.arc(bodyX, headY, 14, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowBlur = 0;
-      ctx.beginPath();
-      ctx.arc(bodyX + (5 * dir), headY - 2, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 14;
-
-      ctx.beginPath();
-      ctx.moveTo(bodyX, headY + 14); ctx.lineTo(bodyX, -25);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(bodyX, headY + 22); ctx.lineTo(rArmX, rArmY);
-      ctx.moveTo(bodyX, headY + 22); ctx.lineTo(lArmX, lArmY);
-      ctx.stroke();
-
-      if (state.animState === 'punch' || state.animState === 'ultimate') {
-        ctx.strokeStyle = streakCount >= 3 ? '#f59e0b' : '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(rArmX, rArmY); ctx.lineTo(rArmX + (25 * dir), rArmY - 10);
-        ctx.stroke();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 4.5;
-      }
-
-      ctx.beginPath();
-      ctx.moveTo(bodyX, -25); ctx.lineTo(rLegX, rLegY);
-      ctx.moveTo(bodyX, -25); ctx.lineTo(lLegX, lLegY);
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function renderCanvas() {
-      const logicalWidth = canvas.clientWidth || (canvas.width / (window.devicePixelRatio || 1));
-      const logicalHeight = canvas.clientHeight || (canvas.height / (window.devicePixelRatio || 1));
-
-      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
-      const groundY = logicalHeight * 0.76;
-
-      if (isFatalityActive) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.88)';
-        ctx.fillRect(0, 0, logicalWidth, logicalHeight);
-
-        const spotX = logicalWidth / 2;
-        const grad = ctx.createRadialGradient(spotX, groundY - 40, 20, spotX, groundY - 40, 280);
-        grad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(spotX, groundY - 40, 280, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.strokeStyle = isFatalityActive ? 'rgba(239, 68, 68, 0.6)' : 'rgba(99, 102, 241, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(0, groundY); ctx.lineTo(logicalWidth, groundY);
-      ctx.stroke();
-
-      ctx.strokeStyle = isFatalityActive ? 'rgba(255, 0, 0, 0.8)' : 'rgba(6, 182, 212, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, groundY + 4); ctx.lineTo(logicalWidth, groundY + 4);
-      ctx.stroke();
-
-      ctx.setLineDash([8, 8]);
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
-      ctx.beginPath();
-      ctx.moveTo(logicalWidth / 2, 0); ctx.lineTo(logicalWidth / 2, logicalHeight);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      const p1X = logicalWidth * 0.3;
-      const p2X = logicalWidth * 0.7;
-
-      drawStickman(p1X, groundY, '#06b6d4', p1State, 1, timSaya === 1 ? comboCount : 0);
-      drawStickman(p2X, groundY, '#ef4444', p2State, -1, timSaya === 2 ? comboCount : 0);
-
-      // Partikel Darah
-      for (let i = bloodParticles.length - 1; i >= 0; i--) {
-        let p = bloodParticles[i];
-        p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.life -= 0.03;
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1.0;
-        if (p.life <= 0) bloodParticles.splice(i, 1);
-      }
-
-      // Damage Text
-      for (let i = damageNumbers.length - 1; i >= 0; i--) {
-        let d = damageNumbers[i];
-        d.y += d.vy;
-        d.life -= 0.025;
-
-        ctx.font = d.isFatality ? "900 32px Orbitron" : (d.isUltimate ? "900 26px Orbitron" : (d.isCrit ? "900 22px Orbitron" : "700 17px Titan One"));
-        ctx.fillStyle = d.isFatality ? "#ff0000" : (d.isUltimate ? "#e0e7ff" : (d.isCrit ? "#f59e0b" : "#ffffff"));
-        ctx.shadowColor = d.isFatality ? "rgba(255, 0, 0, 1)" : (d.isUltimate ? "rgba(168, 85, 247, 0.9)" : (d.isCrit ? "rgba(245, 158, 11, 0.8)" : "rgba(0,0,0,0.8)"));
-        ctx.shadowBlur = d.isFatality ? 30 : (d.isUltimate ? 20 : (d.isCrit ? 12 : 4));
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 5;
-        ctx.globalAlpha = Math.max(0, d.life);
-        ctx.strokeText(d.text, d.x, d.y);
-        ctx.fillText(d.text, d.x, d.y);
-        ctx.globalAlpha = 1.0;
-        ctx.shadowBlur = 0;
-
-        if (d.life <= 0) damageNumbers.splice(i, 1);
-      }
-
-      requestAnimationFrame(renderCanvas);
-    }
 
     function bukaModalCaraMain() { document.getElementById('modal-guide').classList.remove('hidden'); document.getElementById('modal-guide').classList.add('flex'); }
     function tutupModalCaraMain() { document.getElementById('modal-guide').classList.add('hidden'); document.getElementById('modal-guide').classList.remove('flex'); }
@@ -1034,19 +385,6 @@
       }
     }
 
-    function pilihTim(t) {
-      timSaya = t;
-      const btnT1 = document.getElementById('btn-t1');
-      const btnT2 = document.getElementById('btn-t2');
-      if (t === 1) {
-        btnT1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
-        btnT2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
-      } else {
-        btnT2.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-red-500 to-rose-700 shadow-lg shadow-red-500/30 border-2 border-white scale-105 flex items-center justify-center gap-1.5";
-        btnT1.className = "py-3 rounded-xl font-titan text-xs transition-all duration-200 bg-gradient-to-b from-cyan-500 to-blue-700 opacity-50 border-2 border-transparent hover:opacity-100 flex items-center justify-center gap-1.5";
-      }
-    }
-
     function toggleFullScreen() {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
@@ -1055,169 +393,84 @@
       }
     }
 
-    function kirimReaksi(emoji) {
-      if (roomRef) {
-        roomRef.update({ reaction: emoji });
-        setTimeout(() => roomRef.update({ reaction: '' }), 500);
-      }
-    }
-
-    function tampilkanFloatingEmoji(emoji) {
-      playSFX('win');
-      const el = document.createElement('div');
-      el.className = 'floating-emoji';
-      el.innerText = emoji;
-      el.style.left = (Math.random() * 80 + 10) + '%';
-      document.getElementById('emoji-canvas').appendChild(el);
-      setTimeout(() => el.remove(), 2300);
-    }
-
-    function gabungRoom() {
-      initAudio();
-      const inputCode = document.getElementById('room-code').value.trim();
-      if (!inputCode) {
-        tampilkanCustomModal("Peringatan", "Masukkan Kode Room terlebih dahulu!", "⚠️");
-        return;
-      }
-      roomID = inputCode;
-      document.getElementById('lbl-room').innerText = roomID;
-      document.getElementById('lbl-tim').innerText = timSaya === 1 ? "BLUE FIGHTER" : "RED FIGHTER";
-      document.getElementById('lbl-tim').className = timSaya === 1 ? "text-cyan-400 font-titan" : "text-rose-400 font-titan";
-
-      document.getElementById('main-menu').classList.add('hidden');
-      document.getElementById('game-container').classList.remove('hidden');
-      document.getElementById('game-container').classList.add('flex');
-
-      if (roleSaya === 'juri') {
-        document.getElementById('card-soal-box').classList.add('hidden');
-        document.getElementById('grid-jawaban-box').classList.add('hidden');
-        document.getElementById('spectator-panel').classList.remove('hidden');
-        document.getElementById('spectator-panel').classList.add('flex');
-        sampaikanKomentar("Mode Spectator aktif!", true);
-      } else {
-        document.getElementById('card-soal-box').classList.remove('hidden');
-        document.getElementById('grid-jawaban-box').classList.remove('hidden');
-        document.getElementById('spectator-panel').classList.add('hidden');
-        sampaikanKomentar(`Pertarungan di Room ${roomID} dimulai!`, true);
-      }
-
-      startBGM();
-      roomRef = db.ref('rooms/room_' + roomID);
-      inisiatisasiRoom();
-      tampilkanSoal();
-      setTimeout(resizeCanvas, 100);
-    }
-
+    /* SPECIAL RESET ROOM FUNCTIONS */
     function specialResetRoomLobby() {
       const code = document.getElementById('room-code').value.trim();
       if (!code || code.length < 3) {
-        tampilkanCustomModal("Peringatan", "Masukkan kode room (minimal 3 digit)!", "⚠️");
+        alert("Masukkan kode room yang ingin di-reset (minimal 3 digit)!");
         return;
       }
-      tampilkanCustomModal(
-        "Reset Total Room",
-        `Apakah Anda yakin ingin MENGHAPUS SEMUA DATA room "${code}"?`,
-        "💥",
-        true,
-        () => {
-          db.ref('rooms/room_' + code).remove()
-            .then(() => tampilkanCustomModal("Berhasil", `Room "${code}" di-reset total!`, "✅"))
-            .catch((err) => tampilkanCustomModal("Gagal", "Error: " + err.message, "❌"));
-        }
-      );
+      if (confirm(`💥 Apakah Anda yakin ingin MENGHAPUS SEMUA DATA room "${code}"?\nSemua skor dan progres room akan di-reset total dari awal.`)) {
+        const targetRoomRef = db.ref('rooms/room_' + code);
+        targetRoomRef.remove()
+          .then(() => {
+            alert(`✅ Room "${code}" berhasil di-reset total! Silakan gunakan room tersebut kembali.`);
+          })
+          .catch((err) => {
+            alert("Gagal mereset room: " + err.message);
+          });
+      }
     }
 
     function specialResetRoomInGame() {
       if (!roomRef) return;
       const code = document.getElementById('lbl-room').innerText;
-      tampilkanCustomModal(
-        "Reset Room In-Game",
-        `Reset total pertarungan di room "${code}"?`,
-        "💥",
-        true,
-        () => {
-          roomRef.set({ hp1: 100, hp2: 100, startTime: Date.now(), duration: 600, reaction: '', hitEvent: null, isGameOver: false })
-            .then(() => tampilkanCustomModal("Berhasil", "Pertarungan di-reset total!", "✅"));
-        }
-      );
+      if (confirm(`💥 Reset total room "${code}" sekarang?\nTali akan kembali ke 50% dan timer di-reset ke 10 menit!`)) {
+        roomRef.set({ posisi: 50, waktu: 600, reaction: '', punch: '' })
+          .then(() => {
+            alert("✅ Room berhasil di-reset total!");
+          });
+      }
     }
 
-    function bukaEditorSoal() {
-      document.getElementById('modal-editor').classList.remove('hidden');
-      document.getElementById('modal-editor').classList.add('flex');
-      renderFormEditor();
+    function muatSoalDariFirebase() {
+      db.ref('bankSoal').on('value', (snapshot) => {
+        const data = snapshot.val();
+        bankSoal = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+        renderFormEditor();
+      });
     }
+    muatSoalDariFirebase();
 
-    function tutupEditorSoal() {
-      document.getElementById('modal-editor').classList.add('hidden');
-      document.getElementById('modal-editor').classList.remove('flex');
-    }
+    function bukaEditorSoal() { document.getElementById('modal-editor').classList.remove('hidden'); document.getElementById('modal-editor').classList.add('flex'); }
+    function tutupEditorSoal() { document.getElementById('modal-editor').classList.add('hidden'); document.getElementById('modal-editor').classList.remove('flex'); }
 
     function renderFormEditor() {
       const container = document.getElementById('list-soal-container');
       container.innerHTML = '';
-
-      bankSoal.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'bg-slate-900 border border-slate-800 p-3.5 rounded-2xl text-xs space-y-2';
-        div.innerHTML = `
-          <div class="flex justify-between items-center font-bold text-amber-400">
-            <span>Soal #${index + 1}</span>
-            <button class="text-red-400 hover:text-red-300 font-bold" onclick="hapusSoal(${index})">Hapus 🗑</button>
+      if (bankSoal.length === 0) {
+        container.innerHTML = '<div class="text-slate-500 text-center py-12 text-xs">Belum ada soal. Klik "+ Tambah Soal" atau "Import CSV".</div>';
+        return;
+      }
+      bankSoal.forEach((s, idx) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-xs space-y-2';
+        card.innerHTML = `
+          <div class="flex justify-between font-bold text-amber-400">
+            <span>SOAL #${idx + 1}</span>
+            <span class="text-red-400 cursor-pointer hover:underline" onclick="hapusSoal(${idx})">🗑 Hapus</span>
           </div>
-          <input type="text" value="${item.soal.replace(/"/g, '&quot;')}" onchange="updateSoalText(${index}, this.value)" placeholder="Teks Soal" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-indigo-500">
+          <input type="text" class="w-full p-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-medium focus:border-indigo-500 outline-none" value="${s.soal || ''}" onchange="updateDataSoal(${idx}, 'soal', this.value)" placeholder="Pertanyaan...">
           <div class="grid grid-cols-2 gap-2">
-            ${item.opsi.map((opt, oIdx) => `
-              <div class="flex items-center gap-1.5 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
-                <input type="radio" name="ans_${index}" ${item.jawaban === oIdx ? 'checked' : ''} onchange="updateSoalJawaban(${index}, ${oIdx})">
-                <input type="text" value="${opt.replace(/"/g, '&quot;')}" onchange="updateSoalOpsi(${index}, ${oIdx}, this.value)" placeholder="Opsi ${String.fromCharCode(65+oIdx)}" class="w-full bg-transparent text-white outline-none">
-              </div>
-            `).join('')}
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[0] || '' : ''}" onchange="updateDataOpsi(${idx}, 0, this.value)" placeholder="Pilihan A">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[1] || '' : ''}" onchange="updateDataOpsi(${idx}, 1, this.value)" placeholder="Pilihan B">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[2] || '' : ''}" onchange="updateDataOpsi(${idx}, 2, this.value)" placeholder="Pilihan C">
+            <input type="text" class="p-2 rounded-lg bg-slate-950 border border-slate-700 text-white focus:border-indigo-500 outline-none" value="${s.opsi ? s.opsi[3] || '' : ''}" onchange="updateDataOpsi(${idx}, 3, this.value)" placeholder="Pilihan D">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 text-[10px]">Kunci Jawaban (0=A, 1=B, 2=C, 3=D):</span>
+            <input type="number" class="w-16 p-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-center font-bold focus:border-indigo-500 outline-none" value="${s.jawaban !== undefined ? s.jawaban : 0}" onchange="updateDataSoal(${idx}, 'jawaban', parseInt(this.value))" min="0" max="3">
           </div>
         `;
-        container.appendChild(div);
+        container.appendChild(card);
       });
     }
 
-    function tambahBarisSoal() {
-      bankSoal.push({ soal: "Pertanyaan Baru", opsi: ["Opsi A", "Opsi B", "Opsi C", "Opsi D"], jawaban: 0 });
-      renderFormEditor();
-    }
-
-    function hapusSoal(index) {
-      bankSoal.splice(index, 1);
-      renderFormEditor();
-    }
-
-    function updateSoalText(index, val) { bankSoal[index].soal = val; }
-    function updateSoalJawaban(index, val) { bankSoal[index].jawaban = parseInt(val); }
-    function updateSoalOpsi(index, oIdx, val) { bankSoal[index].opsi[oIdx] = val; }
-
-    function resetSemuaSoal() {
-      tampilkanCustomModal("Reset Soal", "Hapus seluruh bank soal?", "🗑", true, () => {
-        bankSoal = [];
-        renderFormEditor();
-      });
-    }
-
-    function simpanKeDatabase() {
-      tampilkanCustomModal("Tersimpan", "Bank soal berhasil disimpan di memori!", "💾");
-      tutupEditorSoal();
-      if (document.getElementById('game-container').classList.contains('flex')) {
-        tampilkanSoal();
-      }
-    }
-
-    function parseCSVLine(line, delimiter) {
-      const regex = new RegExp(`(?:^|${delimiter})(?:"([^"]*)"|([^"${delimiter}]*))`, 'g');
-      const row = [];
-      let matches;
-      while ((matches = regex.exec(line)) !== null) {
-        let val = matches[1] !== undefined ? matches[1] : matches[2];
-        row.push(val ? val.trim() : '');
-      }
-      return row;
-    }
+    function tambahBarisSoal() { bankSoal.push({ soal: "", opsi: ["", "", "", ""], jawaban: 0 }); renderFormEditor(); }
+    function hapusSoal(idx) { bankSoal.splice(idx, 1); renderFormEditor(); }
+    function resetSemuaSoal() { if (confirm("Hapus seluruh soal?")) { bankSoal = []; db.ref('bankSoal').remove().then(() => renderFormEditor()); } }
+    function updateDataSoal(idx, key, val) { bankSoal[idx][key] = val; }
+    function updateDataOpsi(idx, opsiIdx, val) { if (!bankSoal[idx].opsi) bankSoal[idx].opsi = ["","","",""]; bankSoal[idx].opsi[opsiIdx] = val; }
 
     function bacaFileCSV(e) {
       const file = e.target.files[0];
@@ -1225,80 +478,134 @@
       const reader = new FileReader();
       reader.onload = function(evt) {
         const text = evt.target.result;
-        const rawLines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (rawLines.length === 0) return;
-
-        let delimiter = ';';
-        const countSemi = (rawLines[0].match(/;/g) || []).length;
-        const countComma = (rawLines[0].match(/,/g) || []).length;
-        if (countComma > countSemi) delimiter = ',';
-
-        const listBaru = [];
-        rawLines.forEach((line, index) => {
-          let cols = parseCSVLine(line, delimiter);
-          if (cols.length < 5) return;
-          if (index === 0 && cols[0].toLowerCase().includes('soal')) return;
-
-          let jawaban = 0;
-          if (cols[5]) {
-            const rawAns = cols[5].toString().trim().toUpperCase();
-            if (rawAns === 'B') jawaban = 1;
-            else if (rawAns === 'C') jawaban = 2;
-            else if (rawAns === 'D') jawaban = 3;
+        const baris = text.split('\n');
+        let hasilSoal = [];
+        baris.forEach(row => {
+          if (row.trim() !== '') {
+            const col = row.split(',');
+            if (col.length >= 6) {
+              hasilSoal.push({
+                soal: col[0].trim(),
+                opsi: [col[1].trim(), col[2].trim(), col[3].trim(), col[4].trim()],
+                jawaban: parseInt(col[5].trim()) || 0
+              });
+            }
           }
-          listBaru.push({ soal: cols[0], opsi: [cols[1], cols[2], cols[3], cols[4]], jawaban: jawaban });
         });
-
-        if (listBaru.length > 0) {
-          bankSoal = listBaru;
+        if (hasilSoal.length > 0) {
+          bankSoal = hasilSoal;
           renderFormEditor();
-          tampilkanCustomModal("Berhasil", `Berhasil mengimpor ${listBaru.length} soal!`, "📁");
+          alert(`✅ Berhasil import ${hasilSoal.length} soal!`);
+        } else {
+          alert("Format CSV tidak valid!");
         }
       };
       reader.readAsText(file);
     }
 
-    function formatWaktu(detik) {
-      let m = Math.floor(detik / 60);
-      let s = detik % 60;
-      return `${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+    function simpanKeDatabase() {
+      db.ref('bankSoal').set(bankSoal).then(() => { alert("✅ Database diperbarui!"); tutupEditorSoal(); });
     }
 
-    function tampilkanSoal() {
-      if (!bankSoal || bankSoal.length === 0) return;
-      const cur = bankSoal[idxSoal % bankSoal.length];
-      document.getElementById('teks-soal').innerText = cur.soal;
-      for (let i = 0; i < 4; i++) {
-        document.getElementById('opt' + i).innerText = cur.opsi[i] || "-";
+    function pilihTim(t) {
+      timSaya = t;
+      const b1 = document.getElementById('btn-t1');
+      const b2 = document.getElementById('btn-t2');
+      if (t === 1) {
+        b1.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 border-2 border-white scale-105 opacity-100";
+        b2.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 opacity-50 border-2 border-transparent hover:opacity-100";
+      } else {
+        b2.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-red-500 to-red-700 shadow-lg shadow-red-500/30 border-2 border-white scale-105 opacity-100";
+        b1.className = "py-3 rounded-xl font-titan text-sm transition-all duration-200 bg-gradient-to-b from-blue-500 to-blue-700 opacity-50 border-2 border-transparent hover:opacity-100";
       }
     }
 
-    function mulaiHitungMundurStabil() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (!gameStartTime) return;
-        const elapsedSec = Math.floor((Date.now() - gameStartTime) / 1000);
-        const remaining = Math.max(0, 600 - elapsedSec);
+    function gabungRoom() {
+      const code = document.getElementById('room-code').value.trim();
+      if (!code || code.length < 3) { alert("Masukkan kode room minimal 3 digit!"); return; }
+      
+      roomID = "room_" + code;
+      roomRef = db.ref('rooms/' + roomID);
 
-        document.getElementById('waktu').innerText = formatWaktu(remaining);
+      document.getElementById('main-menu').classList.add('hidden');
+      document.getElementById('overlay-menang').classList.add('hidden');
+      document.getElementById('game-container').classList.remove('hidden');
+      document.getElementById('game-container').classList.add('flex');
+      document.getElementById('lbl-room').innerText = code;
+      
+      const lblTim = document.getElementById('lbl-tim');
+      const btns = document.querySelectorAll('.btn-ans');
+      
+      if (roleSaya === 'juri') {
+        lblTim.innerText = "SPECTATOR";
+        lblTim.className = "text-amber-400 font-bold";
+        document.getElementById('spectator-panel').classList.remove('hidden');
+        document.getElementById('spectator-panel').classList.add('flex');
+        document.getElementById('card-soal-box').classList.add('hidden');
+        document.getElementById('grid-jawaban-box').classList.add('hidden');
+      } else {
+        lblTim.innerText = timSaya === 1 ? "NARUTO" : "SASUKE";
+        lblTim.className = timSaya === 1 ? "text-blue-400 font-bold" : "text-red-400 font-bold";
+        document.getElementById('spectator-panel').classList.add('hidden');
+        document.getElementById('card-soal-box').classList.remove('hidden');
+        document.getElementById('grid-jawaban-box').classList.remove('hidden');
 
-        if (remaining <= 0) {
-          clearInterval(timerInterval);
-          if (p1State.hp > p2State.hp) akhiriGame("⏱️ WAKTU HABIS! BLUE FIGHTER UNGGUL!", true);
-          else if (p2State.hp > p1State.hp) akhiriGame("⏱️ WAKTU HABIS! RED FIGHTER UNGGUL!", true);
-          else akhiriGame("⏱️ WAKTU HABIS! PERTANDINGAN SERI!", true);
-        }
-      }, 500);
+        btns.forEach(b => {
+          b.className = `btn-ans glass-btn ${timSaya === 1 ? 'bg-gradient-to-b from-blue-600 to-blue-800 border-blue-400/50' : 'bg-gradient-to-b from-red-600 to-red-800 border-red-400/50'} border-2 rounded-2xl p-3 text-xs md:text-sm font-bold flex items-center gap-2.5 text-left shadow-lg`;
+        });
+
+        comboCount = 0;
+        updateComboBadge();
+        idxSoal = 0;
+        tampilkanSoal();
+      }
+
+      inisiatisasiRoom();
     }
 
     function inisiatisasiRoom() {
       roomRef.get().then((snapshot) => {
-        if (!snapshot.exists() || !snapshot.val()) {
-          roomRef.set({ hp1: 100, hp2: 100, startTime: Date.now(), duration: 600, reaction: '', hitEvent: null, isGameOver: false });
+        if (!snapshot.exists()) {
+          roomRef.set({ posisi: 50, waktu: 600, reaction: '', punch: '' });
         }
         dengarkanServer();
         mulaiHitungMundurStabil();
       });
+    }
+
+    function jalankanAnimasiTinju(penyerang) {
+      playSFX('punch');
+      const arena = document.getElementById('arena-stadium');
+      const avatarNaruto = document.getElementById('avatar-naruto');
+      const avatarSasuke = document.getElementById('avatar-sasuke');
+
+      arena.classList.remove('stadium-shake');
+      void arena.offsetWidth;
+      arena.classList.add('stadium-shake');
+
+      const hitBox = document.createElement('div');
+      hitBox.className = 'punch-hit';
+      hitBox.innerText = '💥';
+
+      if (penyerang === 1) {
+        avatarNaruto.classList.remove('anim-punch-naruto');
+        void avatarNaruto.offsetWidth;
+        avatarNaruto.classList.add('anim-punch-naruto');
+
+        hitBox.style.right = '-10px';
+        hitBox.style.top = '0px';
+        avatarSasuke.appendChild(hitBox);
+      } else {
+        avatarSasuke.classList.remove('anim-punch-sasuke');
+        void avatarSasuke.offsetWidth;
+        avatarSasuke.classList.add('anim-punch-sasuke');
+
+        hitBox.style.left = '-10px';
+        hitBox.style.top = '0px';
+        avatarNaruto.appendChild(hitBox);
+      }
+
+      setTimeout(() => hitBox.remove(), 400);
     }
 
     function dengarkanServer() {
@@ -1306,71 +613,69 @@
         const data = snapshot.val();
         if (!data) return;
 
-        p1State.hp = data.hp1 !== undefined ? data.hp1 : 100;
-        p2State.hp = data.hp2 !== undefined ? data.hp2 : 100;
-        if (data.startTime) gameStartTime = data.startTime;
+        document.getElementById('rope-group').style.left = data.posisi + "%";
 
-        if ((p1State.hp <= 25 && p1State.hp > 0) || (p2State.hp <= 25 && p2State.hp > 0)) {
-          triggerFinishHimBanner();
+        if (data.reaction) {
+          tampilkanFloatingEmoji(data.reaction);
         }
 
-        const danger1 = document.getElementById('danger-badge-1');
-        const danger2 = document.getElementById('danger-badge-2');
-        if (p1State.hp <= 25 && p1State.hp > 0) danger1.classList.remove('hidden'); else danger1.classList.add('hidden');
-        if (p2State.hp <= 25 && p2State.hp > 0) danger2.classList.remove('hidden'); else danger2.classList.add('hidden');
-
-        if (p1State.hp > 0 && p1State.animState === 'ko') p1State.animState = 'idle';
-        if (p2State.hp > 0 && p2State.animState === 'ko') p2State.animState = 'idle';
-
-        document.getElementById('hp-bar-1').style.width = Math.max(0, p1State.hp) + "%";
-        document.getElementById('hp-bar-2').style.width = Math.max(0, p2State.hp) + "%";
-        document.getElementById('hp-text-1').innerText = `${p1State.hp} / 100`;
-        document.getElementById('hp-text-2').innerText = `${p2State.hp} / 100`;
+        if (data.punch) {
+          const p = data.punch.split('_')[0];
+          jalankanAnimasiTinju(parseInt(p));
+        }
 
         if (roleSaya === 'juri') {
-          document.getElementById('spec-hp-1').innerText = p1State.hp;
-          document.getElementById('spec-hp-2').innerText = p2State.hp;
+          document.getElementById('lbl-posisi-tali').innerText = Math.round(data.posisi) + "%";
           const statusLbl = document.getElementById('lbl-status-unggul');
-          if (p1State.hp > p2State.hp) { statusLbl.innerText = "BLUE FIGHTER UNGGUL"; statusLbl.className = "text-cyan-400 font-bold"; }
-          else if (p2State.hp > p1State.hp) { statusLbl.innerText = "RED FIGHTER UNGGUL"; statusLbl.className = "text-rose-400 font-bold"; }
-          else { statusLbl.innerText = "PERTARUNGAN SEIMBANG"; statusLbl.className = "text-amber-400 font-bold"; }
+          if (data.posisi < 50) { statusLbl.innerText = "NARUTO UNGGUL"; statusLbl.className = "text-blue-400 font-bold"; }
+          else if (data.posisi > 50) { statusLbl.innerText = "SASUKE UNGGUL"; statusLbl.className = "text-red-400 font-bold"; }
+          else { statusLbl.innerText = "SEIMBANG"; statusLbl.className = "text-amber-400 font-bold"; }
         }
 
-        if (data.reaction) tampilkanFloatingEmoji(data.reaction);
-
-        if (data.hitEvent && data.hitEvent.timestamp > lastHitTimestamp) {
-          lastHitTimestamp = data.hitEvent.timestamp;
-          triggerStickmanAttack(
-            data.hitEvent.attacker, 
-            data.hitEvent.damage, 
-            data.hitEvent.isCrit, 
-            data.hitEvent.isUltimate,
-            data.hitEvent.isFatality
-          );
-        }
-
-        if (data.isGameOver && data.winnerMsg) {
-          akhiriGame(data.winnerMsg, false);
-        } else if (p1State.hp <= 0) {
-          p1State.animState = 'ko';
-          akhiriGame("💀 RED FIGHTER FATALITY WINNER!", true);
-        } else if (p2State.hp <= 0) {
-          p2State.animState = 'ko';
-          akhiriGame("💀 BLUE FIGHTER FATALITY WINNER!", true);
-        }
+        if (data.posisi <= 15) akhiriGame("🏆 TIM NARUTO MENANG!");
+        else if (data.posisi >= 85) akhiriGame("🏆 TIM SASUKE MENANG!");
       });
     }
 
-    function resetMatchHP() {
-      comboCount = 0; maxComboCount = 0; totalBenarCount = 0; totalJawabCount = 0; energyGauge = 0;
-      if (roomRef) roomRef.update({ hp1: 100, hp2: 100, startTime: Date.now(), isGameOver: false });
-      updateComboBadge(); updateEnergyBars();
+    function kirimReaksi(emoji) {
+      if (roomRef) roomRef.child('reaction').set(emoji + "_" + Date.now());
+    }
+
+    function tampilkanFloatingEmoji(strData) {
+      const emoji = strData.split('_')[0];
+      const el = document.createElement('div');
+      el.className = 'floating-emoji';
+      el.innerText = emoji;
+      el.style.left = (10 + Math.random() * 80) + "vw";
+      document.getElementById('emoji-canvas').appendChild(el);
+      playSFX('cheer');
+      setTimeout(() => el.remove(), 2200);
+    }
+
+    function resetMatchTali() {
+      if (roomRef) roomRef.update({ posisi: 50, waktu: 600 });
+    }
+
+    function mulaiHitungMundurStabil() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!roomRef) return;
+        roomRef.child('waktu').transaction((wkt) => {
+          if (wkt === null) return 600;
+          return wkt > 0 ? wkt - 1 : 0;
+        }, (error, committed, snapshot) => {
+          if (committed && snapshot.exists()) {
+            let totalSec = snapshot.val();
+            let m = Math.floor(totalSec / 60);
+            let s = totalSec % 60;
+            document.getElementById('waktu').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            if (totalSec <= 0) akhiriGame("⏰ WAKTU HABIS!");
+          }
+        });
+      }, 1000);
     }
 
     function keluarGame() {
-      stopBGM();
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      comboCount = 0; energyGauge = 0; finishHimTriggered = false; isFatalityActive = false;
       if (roomRef) { roomRef.off(); roomRef = null; }
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
       document.getElementById('game-container').classList.add('hidden');
@@ -1378,15 +683,23 @@
       document.getElementById('main-menu').classList.remove('hidden');
     }
 
-    function updateEnergyBars() {
-      const myBar = timSaya === 1 ? document.getElementById('energy-bar-1') : document.getElementById('energy-bar-2');
-      if (myBar) myBar.style.width = energyGauge + "%";
+    function tampilkanSoal() {
+      if (bankSoal.length === 0) {
+        document.getElementById('teks-soal').innerText = "Belum ada soal! Silakan isi dulu di Editor Soal.";
+        return;
+      }
+      let s = bankSoal[idxSoal % bankSoal.length];
+      document.getElementById('teks-soal').innerText = s.soal;
+      document.getElementById('opt0').innerText = s.opsi ? s.opsi[0] : "";
+      document.getElementById('opt1').innerText = s.opsi ? s.opsi[1] : "";
+      document.getElementById('opt2').innerText = s.opsi ? s.opsi[2] : "";
+      document.getElementById('opt3').innerText = s.opsi ? s.opsi[3] : "";
     }
 
     function updateComboBadge() {
       const badge = document.getElementById('combo-badge');
-      if (comboCount >= 3) {
-        badge.innerText = `🔥 ${comboCount}X STREAK!`;
+      if (comboCount >= 2) {
+        badge.innerText = `🔥 ${comboCount}X COMBO!`;
         badge.classList.remove('hidden');
       } else {
         badge.classList.add('hidden');
@@ -1394,102 +707,42 @@
     }
 
     function jawab(pilihan) {
-      initAudio();
       if (bankSoal.length === 0 || roleSaya === 'juri') return;
       let s = bankSoal[idxSoal % bankSoal.length];
       let isBenar = (pilihan === s.jawaban);
       
-      totalJawabCount++;
-      let damageDealt = 8;
-      let isCrit = false, isUltimate = false, isFatality = false;
-
-      const enemyHpKey = timSaya === 1 ? 'hp2' : 'hp1';
-      const enemyCurrentHp = timSaya === 1 ? p2State.hp : p1State.hp;
-
+      let basePower = 5;
       if (isBenar) {
-        totalBenarCount++;
         comboCount++;
-        if (comboCount > maxComboCount) maxComboCount = comboCount;
-        energyGauge = Math.min(100, energyGauge + 20);
-
-        if (enemyCurrentHp <= 15 || (energyGauge >= 100 && enemyCurrentHp <= 25)) {
-          damageDealt = 100; isFatality = true;
-        } else if (energyGauge >= 100) {
-          damageDealt = 22; isUltimate = true; energyGauge = 0;
-        } else if (comboCount >= 3) {
-          damageDealt = comboCount >= 6 ? 15 : 12; isCrit = true;
-        }
-
-        roomRef.child('hitEvent').set({
-          attacker: timSaya, damage: damageDealt, isCrit: isCrit, isUltimate: isUltimate, isFatality: isFatality, timestamp: Date.now()
-        });
-
-        roomRef.child(enemyHpKey).transaction((currHp) => {
-          let val = (currHp === null || currHp === undefined) ? 100 : currHp;
-          return Math.max(0, val - damageDealt);
-        });
+        if (comboCount >= 2) basePower *= 2;
+        roomRef.child('punch').set(timSaya + "_" + Date.now());
       } else {
         playSFX('wrong');
         comboCount = 0;
-        damageDealt = 6;
-        const enemyTeam = timSaya === 1 ? 2 : 1;
-
-        roomRef.child('hitEvent').set({
-          attacker: enemyTeam, damage: damageDealt, isCrit: false, isUltimate: false, isFatality: false, timestamp: Date.now()
-        });
-
-        const myHpKey = timSaya === 1 ? 'hp1' : 'hp2';
-        roomRef.child(myHpKey).transaction((currHp) => {
-          let val = (currHp === null || currHp === undefined) ? 100 : currHp;
-          return Math.max(0, val - damageDealt);
-        });
       }
 
       updateComboBadge();
-      updateEnergyBars();
+
+      roomRef.child('posisi').transaction((posSekarang) => {
+        if (posSekarang === null) return 50;
+        if (isBenar) {
+          return timSaya === 1 ? posSekarang - basePower : posSekarang + basePower;
+        } else {
+          return timSaya === 1 ? posSekarang + 3 : posSekarang - 3;
+        }
+      });
+
       idxSoal++;
       tampilkanSoal();
     }
 
-    function akhiriGame(pesan, updateServer = false) {
+    function akhiriGame(pesan) {
       if (timerInterval) clearInterval(timerInterval);
-      stopBGM();
       playSFX('win');
-
-      const winnerBadge = document.getElementById('winner-name-badge');
-      const loserBadge = document.getElementById('loser-name-badge');
-
-      if (p1State.hp > p2State.hp) {
-        if (winnerBadge) winnerBadge.innerText = "BLUE FIGHTER 🟦";
-        if (loserBadge) loserBadge.innerText = "RED FIGHTER 🟥 (K.O.)";
-        sampaikanKomentar("Pertandingan selesai! Petarung Biru keluar sebagai juara sejati!", true);
-      } else if (p2State.hp > p1State.hp) {
-        if (winnerBadge) winnerBadge.innerText = "RED FIGHTER 🟥";
-        if (loserBadge) loserBadge.innerText = "BLUE FIGHTER 🟦 (K.O.)";
-        sampaikanKomentar("Pertandingan selesai! Petarung Merah keluar sebagai juara sejati!", true);
-      } else {
-        if (winnerBadge) winnerBadge.innerText = "SERI / DRAW 🤝";
-        if (loserBadge) loserBadge.innerText = "SERI / DRAW 🤝";
-      }
-
-      document.getElementById('stat-benar').innerText = totalBenarCount;
-      document.getElementById('stat-combo').innerText = maxComboCount + "X";
-      const akurasi = totalJawabCount > 0 ? Math.round((totalBenarCount / totalJawabCount) * 100) : 0;
-      document.getElementById('stat-akurasi').innerText = akurasi + "%";
-
       document.getElementById('teks-menang').innerText = pesan;
       document.getElementById('overlay-menang').classList.remove('hidden');
       document.getElementById('overlay-menang').classList.add('flex');
-
-      if (updateServer && roomRef) {
-        roomRef.update({ isGameOver: true, winnerMsg: pesan });
-      }
     }
-
-    window.onload = function() {
-      resizeCanvas();
-      renderCanvas();
-    };
   </script>
 </body>
 </html>
