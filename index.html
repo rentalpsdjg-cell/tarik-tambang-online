@@ -417,7 +417,6 @@
     const canvas = document.getElementById('stickman-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Canvas Resize Handler
     function resizeCanvas() {
       const container = document.getElementById('arena-stadium');
       if (container && canvas) {
@@ -428,10 +427,10 @@
     window.addEventListener('resize', resizeCanvas);
 
     // Global Game State
-    let p1State = { hp: 100, energy: 0, animState: 'idle', dashProgress: 0, x: 0, y: 0 };
-    let p2State = { hp: 100, energy: 0, animState: 'idle', dashProgress: 0, x: 0, y: 0 };
-    let timSaya = 1; // 1 = Blue Fighter, 2 = Red Fighter
-    let roleSaya = 'player'; // 'player' or 'juri'
+    let p1State = { hp: 100, energy: 0, animState: 'idle' };
+    let p2State = { hp: 100, energy: 0, animState: 'idle' };
+    let timSaya = 1; 
+    let roleSaya = 'player';
     let roomID = '';
     let roomRef = null;
     let timerInterval = null;
@@ -440,10 +439,12 @@
     let totalBenarCount = 0;
     let totalJawabCount = 0;
     let currentQuestionSyncIdx = 0;
+    let idxSoal = 0;
     let finishHimTriggered = false;
     let isFatalityActive = false;
     let fatalityName = '';
     let lastProcessedActionTimestamp = 0;
+    let isRenderLoopRunning = false;
     
     const fatalityNamesList = [
       '⚡ THUNDER GOD SLICE ⚡', 
@@ -455,11 +456,9 @@
     
     let laserEffects = [];
     let bloodParticles = [];
-    let slashEffects = [];
     let damageNumbers = [];
     let customModalCallback = null;
 
-    // Default Bank Soal
     let bankSoal = [
       { soal: "Berapakah hasil dari 15 x 12?", opsi: ["170", "180", "190", "200"], jawaban: 1 },
       { soal: "Apa ibu kota negara Indonesia?", opsi: ["Bandung", "Surabaya", "Jakarta", "Medan"], jawaban: 2 },
@@ -471,7 +470,7 @@
       { soal: "Candi Borobudur terletak di provinsi...", opsi: ["Jawa Tengah", "Jawa Timur", "Yogyakarta", "Jawa Barat"], jawaban: 0 }
     ];
 
-    // Database Setup with Fallback Local Storage
+    // Database Engine & Fallback Mock
     let db;
     try {
       if (typeof firebase !== 'undefined') {
@@ -485,7 +484,6 @@
         throw new Error("Firebase SDK missing");
       }
     } catch(e) {
-      // Local Database Mock Engine for Offline / Standalone Fallback
       const localRooms = {};
       db = {
         ref: function(path) {
@@ -521,8 +519,6 @@
     }
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // BGM & Announcer States
     let isBGMEnabled = true;
     let isVoiceEnabled = true;
     let bgmInterval = null;
@@ -530,7 +526,6 @@
     let bgmTempoMs = 220;
     let lastCommentaryTime = 0;
 
-    // Web Audio SFX Synthesizer
     function playSFX(type) {
       try {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -593,7 +588,6 @@
       } catch(e) {}
     }
 
-    // BGM Controls
     function startBGM() {
       if (!isBGMEnabled || bgmInterval) return;
       const notes = [110, 110, 130, 110, 146, 110, 130, 98];
@@ -692,7 +686,6 @@
       }
     }
 
-    // Web Speech API Voice setup
     let idVoice = null;
     function loadVoices() {
       if ('speechSynthesis' in window) {
@@ -857,7 +850,7 @@
       ctx.arc(0, -70 + bounceY, 16, 0, Math.PI * 2);
       ctx.fill();
 
-      // Headband / Crown Detail
+      // Headband
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -873,12 +866,10 @@
       ctx.lineTo(0, -10 + bounceY);
       ctx.stroke();
 
-      // Arms & Legs based on Anim State
       if (state === 'punch') {
-        // Attack Pose
         ctx.beginPath();
         ctx.moveTo(0, -45);
-        ctx.lineTo(isBlue ? 35 : -35, -45); // Extended punch
+        ctx.lineTo(isBlue ? 35 : -35, -45);
         ctx.moveTo(0, -45);
         ctx.lineTo(isBlue ? -15 : 15, -25);
         ctx.stroke();
@@ -890,7 +881,6 @@
         ctx.lineTo(isBlue ? -20 : 20, 25);
         ctx.stroke();
       } else if (state === 'ultimate') {
-        // Ultimate Beam Pose
         ctx.beginPath();
         ctx.moveTo(0, -45);
         ctx.lineTo(isBlue ? 40 : -40, -45);
@@ -898,13 +888,11 @@
         ctx.lineTo(isBlue ? 40 : -40, -40);
         ctx.stroke();
 
-        // Aura sphere
         ctx.beginPath();
         ctx.arc(isBlue ? 45 : -45, -42, 18, 0, Math.PI * 2);
         ctx.fillStyle = '#f59e0b';
         ctx.fill();
       } else if (state === 'hurt') {
-        // Hurt Stagger Pose
         ctx.beginPath();
         ctx.moveTo(0, -45);
         ctx.lineTo(isBlue ? -25 : 25, -60);
@@ -919,7 +907,6 @@
         ctx.lineTo(isBlue ? 15 : -15, 25);
         ctx.stroke();
       } else if (state === 'ko') {
-        // Fallen KO Pose
         ctx.restore();
         ctx.save();
         ctx.translate(x, y + 20);
@@ -949,7 +936,6 @@
         ctx.restore();
         return;
       } else {
-        // Idle Stance
         const legSwing = Math.sin(time * 3) * 6;
         const armSwing = Math.cos(time * 3) * 8;
 
@@ -977,7 +963,6 @@
 
       const groundY = canvas.height * 0.78;
 
-      // Draw Stadium Floor & Grid Glow Lines
       ctx.strokeStyle = 'rgba(99, 102, 241, 0.25)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -992,7 +977,6 @@
         ctx.stroke();
       }
 
-      // Fighter Ground Shadows
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.beginPath();
       ctx.ellipse(canvas.width * 0.25, groundY + 5, 30, 8, 0, 0, Math.PI * 2);
@@ -1001,7 +985,6 @@
       ctx.ellipse(canvas.width * 0.75, groundY + 5, 30, 8, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Laser Ultimate Beam Effects
       for (let i = laserEffects.length - 1; i >= 0; i--) {
         const laser = laserEffects[i];
         ctx.save();
@@ -1019,11 +1002,9 @@
         if (laser.life <= 0) laserEffects.splice(i, 1);
       }
 
-      // Draw P1 (Blue) and P2 (Red) Stickmen
       drawStickman(canvas.width * 0.25, groundY - 25, true, p1State.animState);
       drawStickman(canvas.width * 0.75, groundY - 25, false, p2State.animState);
 
-      // Blood & Spark Particles
       for (let i = bloodParticles.length - 1; i >= 0; i--) {
         const p = bloodParticles[i];
         ctx.fillStyle = p.color;
@@ -1035,12 +1016,11 @@
 
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.5; // Gravity
+        p.vy += 0.5;
         p.life -= 0.03;
         if (p.life <= 0) bloodParticles.splice(i, 1);
       }
 
-      // Damage & Floating Text Numbers
       for (let i = damageNumbers.length - 1; i >= 0; i--) {
         const d = damageNumbers[i];
         ctx.save();
@@ -1104,7 +1084,6 @@
 
       roomRef = db.ref('rooms/' + roomID);
 
-      // Initialize Room snapshot if absent
       roomRef.get().then((snap) => {
         if (!snap.exists()) {
           roomRef.set({
@@ -1121,14 +1100,12 @@
         }
       });
 
-      // Attach Real-Time Database Sync Listener
       roomRef.on('value', (snap) => {
         const data = snap.val();
         if (!data) return;
 
         updateVisualState(data);
 
-        // Process Synchronized Action Events
         if (data.lastAction && data.lastAction.timestamp > lastProcessedActionTimestamp) {
           lastProcessedActionTimestamp = data.lastAction.timestamp;
           triggerStickmanAttack(
@@ -1140,14 +1117,12 @@
           );
         }
 
-        // Process Spectator Reactions
         if (data.reaction && data.reaction.timestamp > (window.lastReactionTime || 0)) {
           window.lastReactionTime = data.reaction.timestamp;
           spawnFloatingEmoji(data.reaction.emoji);
         }
       });
 
-      // Switch Screens
       document.getElementById('main-menu').classList.add('hidden');
       document.getElementById('game-container').classList.remove('hidden');
       document.getElementById('game-container').classList.add('flex');
@@ -1178,14 +1153,12 @@
       p1State.energy = data.energy1 || 0;
       p2State.energy = data.energy2 || 0;
 
-      // Sync Question Index
       if (data.currentQuestion !== undefined && data.currentQuestion !== currentQuestionSyncIdx) {
         currentQuestionSyncIdx = data.currentQuestion;
         idxSoal = currentQuestionSyncIdx % bankSoal.length;
         muatSoal();
       }
 
-      // Sync Health Bars
       document.getElementById('hp-bar-1').style.width = Math.max(0, p1State.hp) + '%';
       document.getElementById('hp-bar-2').style.width = Math.max(0, p2State.hp) + '%';
       document.getElementById('hp-text-1').innerText = `${Math.max(0, p1State.hp)} / 100`;
@@ -1194,11 +1167,9 @@
       document.getElementById('spec-hp-1').innerText = p1State.hp;
       document.getElementById('spec-hp-2').innerText = p2State.hp;
 
-      // Sync Super Energy Bars
       document.getElementById('energy-bar-1').style.width = p1State.energy + '%';
       document.getElementById('energy-bar-2').style.width = p2State.energy + '%';
 
-      // Danger Critical Warning Badges
       const danger1 = document.getElementById('danger-badge-1');
       const danger2 = document.getElementById('danger-badge-2');
       if (p1State.hp <= 25 && p1State.hp > 0) danger1.classList.remove('hidden');
@@ -1207,7 +1178,6 @@
       if (p2State.hp <= 25 && p2State.hp > 0) danger2.classList.remove('hidden');
       else danger2.classList.add('hidden');
 
-      // Finish Him Banner Check
       const targetHp = timSaya === 1 ? p2State.hp : p1State.hp;
       if (targetHp <= 25 && targetHp > 0 && !finishHimTriggered) {
         finishHimTriggered = true;
@@ -1221,7 +1191,6 @@
         }, 2200);
       }
 
-      // Check KO Game Over Condition
       if ((p1State.hp <= 0 || p2State.hp <= 0) && !data.isGameOver) {
         tampilkanHasilPertandingan(p1State.hp > p2State.hp ? 1 : 2);
       }
@@ -1236,7 +1205,6 @@
       document.getElementById('opt2').innerText = q.opsi[2];
       document.getElementById('opt3').innerText = q.opsi[3];
 
-      // Enable Answer Buttons
       const btns = document.querySelectorAll('.btn-ans');
       btns.forEach(b => {
         b.disabled = false;
@@ -1245,11 +1213,11 @@
     }
 
     function jawab(indexPilihan) {
+      if (!bankSoal || bankSoal.length === 0) return;
       const q = bankSoal[idxSoal];
       const isCorrect = (indexPilihan === q.jawaban);
       totalJawabCount++;
 
-      // Disable buttons temporarily to prevent double click
       const btns = document.querySelectorAll('.btn-ans');
       btns.forEach(b => b.disabled = true);
 
@@ -1258,7 +1226,6 @@
         comboCount++;
         if (comboCount > maxComboCount) maxComboCount = comboCount;
 
-        // Show Combo Badge
         const comboBadge = document.getElementById('combo-badge');
         if (comboCount >= 2) {
           comboBadge.innerText = `🔥 ${comboCount}X COMBO!`;
@@ -1276,7 +1243,7 @@
 
         if (targetHp <= 25 || (myEnergy >= 100 && comboCount >= 3)) {
           isFatality = true;
-          damage = targetHp; // Instant KO Execution
+          damage = targetHp;
         } else if (myEnergy >= 100) {
           isUltimate = true;
           damage = 22;
@@ -1285,12 +1252,11 @@
           damage = 15;
         }
 
-        const newP1Hp = attacker === 1 ? p1State.hp : Math.max(0, p2State.hp - damage);
-        const newP2Hp = attacker === 2 ? p2State.hp : Math.max(0, p1State.hp - damage);
+        const newP1Hp = attacker === 1 ? p1State.hp : Math.max(0, p1State.hp - damage);
+        const newP2Hp = attacker === 2 ? p2State.hp : Math.max(0, p2State.hp - damage);
         const newEnergy1 = attacker === 1 ? (isUltimate || isFatality ? 0 : Math.min(100, p1State.energy + 25)) : p1State.energy;
         const newEnergy2 = attacker === 2 ? (isUltimate || isFatality ? 0 : Math.min(100, p2State.energy + 25)) : p2State.energy;
 
-        // Dispatch synchronized action payload to Firebase
         roomRef.update({
           hp1: newP1Hp,
           hp2: newP2Hp,
@@ -1308,13 +1274,11 @@
         });
 
       } else {
-        // Wrong Answer
         comboCount = 0;
         document.getElementById('combo-badge').classList.add('hidden');
         playSFX('wrong');
         sampaikanKomentar("Jawaban salah! Combo terputus!", false);
 
-        // Advance question after short pause
         setTimeout(() => {
           roomRef.update({
             currentQuestion: (currentQuestionSyncIdx + 1)
@@ -1566,7 +1530,10 @@
 
     window.onload = function() {
       resizeCanvas();
-      renderArenaCanvas();
+      if (!isRenderLoopRunning) {
+        isRenderLoopRunning = true;
+        renderArenaCanvas();
+      }
     };
   </script>
 </body>
